@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>미국 주식 분석 대시보드</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .search-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        #stockInput {
+            flex: 1;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            transition: border-color 0.3s;
+            text-transform: uppercase;
+        }
+
+        #stockInput:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .quick-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .quick-btn:hover {
+            background: #e0e0e0;
+            border-color: #2a5298;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .price-display {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #2a5298;
+            margin: 10px 0;
+        }
+
+        .change {
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+
+        .positive {
+            color: #4caf50;
+        }
+
+        .negative {
+            color: #f44336;
+        }
+
+        .chart-container {
+            grid-column: 1 / -1;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            height: 400px;
+        }
+
+        #priceChart {
+            width: 100%;
+            height: 100%;
+        }
+
+        .indicators {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .indicator {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .indicator-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .indicator-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stock-info {
+            line-height: 1.8;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: #333;
+            font-weight: bold;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .api-info {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #e65100;
+        }
+
+        .market-status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .status-regular {
+            background: #4caf50;
+            color: white;
+        }
+
+        .status-pre {
+            background: #ff9800;
+            color: white;
+        }
+
+        .status-post {
+            background: #2196f3;
+            color: white;
+        }
+
+        .status-closed {
+            background: #9e9e9e;
+            color: white;
+        }
+
+        .extended-hours {
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #ff9800;
+        }
+
+        .extended-hours h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .extended-price {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+            margin: 5px 0;
+        }
+
+        .signal-panel {
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            border: 3px solid #e0e0e0;
+        }
+
+        .signal-strong-buy {
+            border-color: #4caf50;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        }
+
+        .signal-buy {
+            border-color: #8bc34a;
+            background: linear-gradient(135deg, #f1f8e9 0%, #dcedc8 100%);
+        }
+
+        .signal-neutral {
+            border-color: #ff9800;
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+        }
+
+        .signal-sell {
+            border-color: #f44336;
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+        }
+
+        .signal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .signal-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .signal-badge {
+            font-size: 1.5em;
+            font-weight: bold;
+            padding: 10px 25px;
+            border-radius: 25px;
+            color: white;
+        }
+
+        .badge-strong-buy {
+            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+        }
+
+        .badge-buy {
+            background: linear-gradient(135deg, #8bc34a 0%, #558b2f 100%);
+        }
+
+        .badge-neutral {
+            background: linear-gradient(135deg, #ff9800 0%, #e65100 100%);
+        }
+
+        .badge-sell {
+            background: linear-gradient(135deg, #f44336 0%, #c62828 100%);
+        }
+
+        .signal-score {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .signal-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .signal-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #e0e0e0;
+        }
+
+        .signal-item.bullish {
+            border-left-color: #4caf50;
+        }
+
+        .signal-item.bearish {
+            border-left-color: #f44336;
+        }
+
+        .signal-item.neutral {
+            border-left-color: #ff9800;
+        }
+
+        .signal-item-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .signal-item-value {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .recommendation {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .recommendation h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .recommendation ul {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                grid-column: 1;
+            }
+
+            .quick-buttons {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 미국 주식 분석 대시보드</h1>
+            <p class="subtitle">US Stock Market Analysis - Real-time Data</p>
+        </header>
+
+        <div class="search-section">
+            <h3>주식 검색 (Stock Symbol)</h3>
+            <div class="search-box">
+                <input type="text" id="stockInput" placeholder="티커 입력 (예: AAPL, TSLA, NVDA, MSFT)" />
+                <button onclick="searchStock()">검색</button>
+            </div>
+            <p style="margin-bottom: 15px; color: #666;">인기 종목:</p>
+            <div class="quick-buttons">
+                <button class="quick-btn" onclick="quickSearch('AAPL')">🍎 Apple</button>
+                <button class="quick-btn" onclick="quickSearch('TSLA')">🚗 Tesla</button>
+                <button class="quick-btn" onclick="quickSearch('NVDA')">💻 NVIDIA</button>
+                <button class="quick-btn" onclick="quickSearch('MSFT')">🪟 Microsoft</button>
+                <button class="quick-btn" onclick="quickSearch('GOOGL')">🔍 Google</button>
+                <button class="quick-btn" onclick="quickSearch('AMZN')">📦 Amazon</button>
+                <button class="quick-btn" onclick="quickSearch('META')">📘 Meta</button>
+                <button class="quick-btn" onclick="quickSearch('NFLX')">🎬 Netflix</button>
+            </div>
+            <div class="api-info">
+                <strong>💡 API 정보:</strong> 이 대시보드는 Yahoo Finance API를 사용하여 실시간 미국 주식 데이터를 가져옵니다.
+                <br>4개의 CORS 프록시 서버를 자동으로 전환하며, 각 서버당 최대 2번 재시도합니다. (최대 15초 타임아웃)
+                <br>무료로 사용 가능하며, 브라우저 콘솔(F12)에서 실시간 연결 상태를 확인할 수 있습니다.
+            </div>
+        </div>
+
+        <div id="content">
+            <div class="loading">위의 인기 종목을 클릭하거나 티커를 입력하여 주식 정보를 확인하세요</div>
+        </div>
+    </div>
+
+    <script>
+        let currentStock = null;
+
+        async function searchStock() {
+            const symbol = document.getElementById('stockInput').value.trim().toUpperCase();
+            if (!symbol) {
+                alert('티커 심볼을 입력해주세요');
+                return;
+            }
+            await fetchStockData(symbol);
+        }
+
+        function quickSearch(symbol) {
+            document.getElementById('stockInput').value = symbol;
+            fetchStockData(symbol);
+        }
+
+        const PROXY_SERVERS = [
+            'https://api.allorigins.win/raw?url=',
+            'https://corsproxy.io/?',
+            'https://api.codetabs.com/v1/proxy?quest=',
+            'https://cors-anywhere.herokuapp.com/'
+        ];
+
+        async function fetchWithRetry(url, maxRetries = 2) {
+            let lastError = null;
+
+            for (let proxyIndex = 0; proxyIndex < PROXY_SERVERS.length; proxyIndex++) {
+                const proxy = PROXY_SERVERS[proxyIndex];
+
+                for (let attempt = 0; attempt < maxRetries; attempt++) {
+                    try {
+                        console.log(`시도 중: Proxy ${proxyIndex + 1}/${PROXY_SERVERS.length}, Attempt ${attempt + 1}/${maxRetries}`);
+
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+                        const response = await fetch(proxy + encodeURIComponent(url), {
+                            signal: controller.signal,
+                            headers: {
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        clearTimeout(timeoutId);
+
+                        console.log(`응답 상태: ${response.status}`);
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+
+                        const data = await response.json();
+                        console.log('데이터 수신 성공:', data);
+                        return data;
+                    } catch (error) {
+                        lastError = error;
+                        console.error(`Proxy ${proxyIndex + 1}, Attempt ${attempt + 1} 실패:`, error.message);
+
+                        if (attempt < maxRetries - 1) {
+                            const delay = 1500 * (attempt + 1);
+                            console.log(`${delay}ms 후 재시도...`);
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                        }
+                    }
+                }
+            }
+
+            throw new Error(`모든 프록시 서버에서 데이터를 가져오는데 실패했습니다.\n마지막 오류: ${lastError?.message || '알 수 없음'}\n\n해결 방법:\n1. 잠시 후 다시 시도\n2. 다른 티커 시도\n3. 브라우저 콘솔(F12)에서 자세한 오류 확인`);
+        }
+
+        async function fetchStockData(symbol) {
+            document.getElementById('content').innerHTML = '<div class="loading">📡 데이터를 불러오는 중...<br><small>여러 프록시 서버를 시도하고 있습니다. 최대 30초 소요될 수 있습니다.</small></div>';
+
+            try {
+                console.log(`주식 데이터 요청 시작: ${symbol}`);
+                const apiUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1mo`;
+                console.log('API URL:', apiUrl);
+
+                const quote = await fetchWithRetry(apiUrl);
+
+                console.log('받은 데이터:', quote);
+
+                if (!quote || !quote.chart) {
+                    throw new Error('잘못된 응답 형식입니다. API가 변경되었을 수 있습니다.');
+                }
+
+                if (quote.chart.error) {
+                    throw new Error(`Yahoo Finance API 오류: ${quote.chart.error.description || '알 수 없는 오류'}`);
+                }
+
+                if (!quote.chart.result || quote.chart.result.length === 0) {
+                    throw new Error('종목을 찾을 수 없습니다. 올바른 티커 심볼을 입력했는지 확인해주세요.');
+                }
+
+                const result = quote.chart.result[0];
+                const meta = result.meta;
+                const currentPrice = meta.regularMarketPrice;
+                const previousClose = meta.chartPreviousClose || meta.previousClose;
+                const change = currentPrice - previousClose;
+                const changePercent = (change / previousClose) * 100;
+
+                const timestamps = result.timestamp;
+                const prices = result.indicators.quote[0];
+                const historicalPrices = prices.close.filter(p => p !== null);
+
+                const marketState = meta.marketState || 'REGULAR';
+                const hasPreMarket = meta.preMarketPrice !== undefined;
+                const hasPostMarket = meta.postMarketPrice !== undefined;
+
+                const stockData = {
+                    symbol: symbol,
+                    name: getStockName(symbol),
+                    price: currentPrice,
+                    change: change,
+                    changePercent: changePercent,
+                    currency: meta.currency,
+                    volume: meta.regularMarketVolume || 0,
+                    high: meta.regularMarketDayHigh || currentPrice,
+                    low: meta.regularMarketDayLow || currentPrice,
+                    open: meta.regularMarketOpen || currentPrice,
+                    previousClose: previousClose,
+                    marketCap: meta.marketCap ? (meta.marketCap / 1e9).toFixed(2) : 'N/A',
+                    historicalPrices: historicalPrices,
+                    timestamps: timestamps,
+                    marketState: marketState,
+                    preMarketPrice: meta.preMarketPrice,
+                    preMarketChange: meta.preMarketChange,
+                    preMarketChangePercent: meta.preMarketChangePercent,
+                    postMarketPrice: meta.postMarketPrice,
+                    postMarketChange: meta.postMarketChange,
+                    postMarketChangePercent: meta.postMarketChangePercent,
+                    hasPreMarket: hasPreMarket,
+                    hasPostMarket: hasPostMarket
+                };
+
+                displayStockData(stockData);
+
+            } catch (error) {
+                console.error('최종 오류:', error);
+                console.error('오류 스택:', error.stack);
+                document.getElementById('content').innerHTML = `
+                    <div class="error">
+                        <h3>❌ 오류 발생</h3>
+                        <p style="white-space: pre-wrap; word-break: break-word;">${error.message}</p>
+                        <p style="margin-top: 10px;"><strong>가능한 원인:</strong></p>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>잘못된 티커 심볼 (올바른 예: AAPL, TSLA, NVDA)</li>
+                            <li>모든 CORS 프록시 서버가 일시적으로 불안정함</li>
+                            <li>Yahoo Finance API 장애 또는 변경</li>
+                            <li>네트워크 연결 문제 또는 방화벽 차단</li>
+                            <li>브라우저의 CORS 정책 또는 광고 차단기</li>
+                        </ul>
+                        <p style="margin-top: 15px;">
+                            💡 <strong>해결 방법:</strong><br>
+                            1. <strong>F12 키를 눌러 개발자 도구 → Console 탭</strong>에서 자세한 오류 확인<br>
+                            2. 광고 차단 확장 프로그램을 일시적으로 비활성화<br>
+                            3. 다른 종목(예: AAPL, MSFT)을 시도해보세요<br>
+                            4. 10-20초 후 다시 시도해주세요<br>
+                            5. 다른 브라우저에서 시도해보세요<br>
+                            6. 페이지를 새로고침(Ctrl+F5)해보세요
+                        </p>
+                        <div style="margin-top: 15px; display: flex; gap: 10px;">
+                            <button onclick="fetchStockData('${symbol}')">🔄 다시 시도</button>
+                            <button onclick="fetchStockData('AAPL')">🍎 Apple로 테스트</button>
+                            <button onclick="window.location.reload()">🔃 페이지 새로고침</button>
+                        </div>
+                        <div style="margin-top: 15px; padding: 10px; background: #fff; border-radius: 5px; font-size: 0.85em;">
+                            <strong>🔍 디버그 정보:</strong><br>
+                            티커: ${symbol}<br>
+                            타임스탬프: ${new Date().toLocaleString()}<br>
+                            브라우저: ${navigator.userAgent.split(' ').slice(-2).join(' ')}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function getStockName(symbol) {
+            const stocks = {
+                'AAPL': 'Apple Inc.',
+                'TSLA': 'Tesla Inc.',
+                'NVDA': 'NVIDIA Corporation',
+                'MSFT': 'Microsoft Corporation',
+                'GOOGL': 'Alphabet Inc.',
+                'AMZN': 'Amazon.com Inc.',
+                'META': 'Meta Platforms Inc.',
+                'NFLX': 'Netflix Inc.',
+                'AMD': 'Advanced Micro Devices',
+                'INTC': 'Intel Corporation',
+                'DIS': 'The Walt Disney Company',
+                'BABA': 'Alibaba Group',
+                'NIO': 'NIO Inc.',
+                'BA': 'The Boeing Company',
+                'COIN': 'Coinbase Global Inc.'
+            };
+            return stocks[symbol] || symbol;
+        }
+
+        function displayStockData(data) {
+            currentStock = data;
+            const changeClass = data.change >= 0 ? 'positive' : 'negative';
+            const changeSymbol = data.change >= 0 ? '▲' : '▼';
+
+            const rsi = calculateRSI(data.historicalPrices);
+            const ma20 = calculateMA(data.historicalPrices, 20);
+            const ma50 = calculateMA(data.historicalPrices, 50);
+
+            const marketStatusInfo = getMarketStatus(data.marketState);
+            let extendedHoursHTML = '';
+
+            if (data.hasPreMarket && data.preMarketPrice) {
+                const preChangeClass = data.preMarketChange >= 0 ? 'positive' : 'negative';
+                const preChangeSymbol = data.preMarketChange >= 0 ? '▲' : '▼';
+                extendedHoursHTML += `
+                    <div class="extended-hours">
+                        <h4>🌅 프리마켓 (Pre-Market)</h4>
+                        <div class="extended-price">$${data.preMarketPrice.toFixed(2)}</div>
+                        <div class="change ${preChangeClass}">
+                            ${preChangeSymbol} $${Math.abs(data.preMarketChange).toFixed(2)}
+                            (${data.preMarketChangePercent.toFixed(2)}%)
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (data.hasPostMarket && data.postMarketPrice) {
+                const postChangeClass = data.postMarketChange >= 0 ? 'positive' : 'negative';
+                const postChangeSymbol = data.postMarketChange >= 0 ? '▲' : '▼';
+                extendedHoursHTML += `
+                    <div class="extended-hours" style="border-left-color: #2196f3;">
+                        <h4>🌙 애프터마켓 (After-Hours)</h4>
+                        <div class="extended-price">$${data.postMarketPrice.toFixed(2)}</div>
+                        <div class="change ${postChangeClass}">
+                            ${postChangeSymbol} $${Math.abs(data.postMarketChange).toFixed(2)}
+                            (${data.postMarketChangePercent.toFixed(2)}%)
+                        </div>
+                    </div>
+                `;
+            }
+
+            const buySignal = analyzeBuySignal(data, rsi, ma20, ma50);
+
+            const html = `
+                ${buySignal.html}
+
+                <div class="dashboard">
+                    <div class="card">
+                        <h3>${data.name}
+                            <span class="market-status ${marketStatusInfo.className}">${marketStatusInfo.text}</span>
+                        </h3>
+                        <p style="color: #666; margin-bottom: 10px;">${data.symbol}</p>
+                        <div class="price-display">$${data.price.toFixed(2)}</div>
+                        <div class="change ${changeClass}">
+                            ${changeSymbol} $${Math.abs(data.change).toFixed(2)}
+                            (${data.changePercent.toFixed(2)}%)
+                        </div>
+                        ${extendedHoursHTML}
+                    </div>
+
+                    <div class="card">
+                        <h3>거래 정보</h3>
+                        <div class="stock-info">
+                            <div class="info-row">
+                                <span class="info-label">거래량 (Volume)</span>
+                                <span class="info-value">${formatNumber(data.volume)}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">시가 (Open)</span>
+                                <span class="info-value">$${data.open.toFixed(2)}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">고가 (High)</span>
+                                <span class="info-value">$${data.high.toFixed(2)}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">저가 (Low)</span>
+                                <span class="info-value">$${data.low.toFixed(2)}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">전일 종가</span>
+                                <span class="info-value">$${data.previousClose.toFixed(2)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>시장 정보</h3>
+                        <div class="stock-info">
+                            <div class="info-row">
+                                <span class="info-label">시가총액 (Market Cap)</span>
+                                <span class="info-value">$${data.marketCap}B</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">통화 (Currency)</span>
+                                <span class="info-value">${data.currency}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">52주 변동</span>
+                                <span class="info-value">${data.changePercent > 0 ? '상승' : '하락'}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3>가격 추이 (30일)</h3>
+                    <canvas id="priceChart"></canvas>
+                </div>
+
+                <div class="card">
+                    <h3>기술적 지표</h3>
+                    <div class="indicators">
+                        <div class="indicator">
+                            <div class="indicator-label">RSI (14)</div>
+                            <div class="indicator-value">${rsi.toFixed(2)}</div>
+                            <div style="font-size: 0.8em; margin-top: 5px; color: ${rsi > 70 ? '#f44336' : rsi < 30 ? '#4caf50' : '#666'}">
+                                ${rsi > 70 ? '과매수' : rsi < 30 ? '과매도' : '중립'}
+                            </div>
+                        </div>
+                        <div class="indicator">
+                            <div class="indicator-label">이동평균 (20일)</div>
+                            <div class="indicator-value">$${ma20.toFixed(2)}</div>
+                            <div style="font-size: 0.8em; margin-top: 5px; color: ${data.price > ma20 ? '#4caf50' : '#f44336'}">
+                                ${data.price > ma20 ? '상승추세' : '하락추세'}
+                            </div>
+                        </div>
+                        <div class="indicator">
+                            <div class="indicator-label">이동평균 (50일)</div>
+                            <div class="indicator-value">$${ma50.toFixed(2)}</div>
+                            <div style="font-size: 0.8em; margin-top: 5px; color: ${data.price > ma50 ? '#4caf50' : '#f44336'}">
+                                ${data.price > ma50 ? '상승추세' : '하락추세'}
+                            </div>
+                        </div>
+                        <div class="indicator">
+                            <div class="indicator-label">변동성</div>
+                            <div class="indicator-value">${calculateVolatility(data.historicalPrices).toFixed(2)}%</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('content').innerHTML = html;
+            drawChart(data);
+        }
+
+        function getMarketStatus(state) {
+            const statusMap = {
+                'REGULAR': { text: '정규장', className: 'status-regular' },
+                'PRE': { text: '프리마켓', className: 'status-pre' },
+                'POST': { text: '애프터마켓', className: 'status-post' },
+                'PREPRE': { text: '프리마켓', className: 'status-pre' },
+                'POSTPOST': { text: '애프터마켓', className: 'status-post' },
+                'CLOSED': { text: '마감', className: 'status-closed' }
+            };
+            return statusMap[state] || { text: '알 수 없음', className: 'status-closed' };
+        }
+
+        function calculateRSI(prices, period = 14) {
+            if (prices.length < period + 1) return 50;
+
+            let gains = 0;
+            let losses = 0;
+
+            for (let i = prices.length - period; i < prices.length; i++) {
+                const change = prices[i] - prices[i - 1];
+                if (change > 0) gains += change;
+                else losses += Math.abs(change);
+            }
+
+            const avgGain = gains / period;
+            const avgLoss = losses / period;
+
+            if (avgLoss === 0) return 100;
+            const rs = avgGain / avgLoss;
+            return 100 - (100 / (1 + rs));
+        }
+
+        function calculateMA(prices, period) {
+            if (prices.length < period) period = prices.length;
+            const recentPrices = prices.slice(-period);
+            return recentPrices.reduce((a, b) => a + b, 0) / period;
+        }
+
+        function calculateVolatility(prices) {
+            if (prices.length < 2) return 0;
+            const returns = [];
+            for (let i = 1; i < prices.length; i++) {
+                returns.push((prices[i] - prices[i - 1]) / prices[i - 1] * 100);
+            }
+            const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
+            const variance = returns.reduce((sum, ret) => sum + Math.pow(ret - mean, 2), 0) / returns.length;
+            return Math.sqrt(variance);
+        }
+
+        function calculateMACD(prices) {
+            const ema12 = calculateEMA(prices, 12);
+            const ema26 = calculateEMA(prices, 26);
+            const macdLine = ema12 - ema26;
+            return macdLine;
+        }
+
+        function calculateEMA(prices, period) {
+            if (prices.length === 0) return 0;
+            const k = 2 / (period + 1);
+            let ema = prices[0];
+            for (let i = 1; i < prices.length; i++) {
+                ema = prices[i] * k + ema * (1 - k);
+            }
+            return ema;
+        }
+
+        function calculateBollingerBands(prices, period = 20) {
+            const ma = calculateMA(prices, period);
+            const recentPrices = prices.slice(-period);
+            const variance = recentPrices.reduce((sum, price) => sum + Math.pow(price - ma, 2), 0) / period;
+            const stdDev = Math.sqrt(variance);
+            return {
+                upper: ma + (2 * stdDev),
+                middle: ma,
+                lower: ma - (2 * stdDev)
+            };
+        }
+
+        function analyzeBuySignal(data, rsi, ma20, ma50) {
+            const signals = [];
+            let score = 50; // 기본 중립 점수
+
+            const prices = data.historicalPrices;
+            const currentPrice = data.price;
+            const macd = calculateMACD(prices);
+            const bb = calculateBollingerBands(prices);
+            const ma5 = calculateMA(prices, 5);
+            const ma10 = calculateMA(prices, 10);
+
+            const priceChange = ((currentPrice - prices[prices.length - 5]) / prices[prices.length - 5]) * 100;
+            const priceChange10d = ((currentPrice - prices[prices.length - 10]) / prices[prices.length - 10]) * 100;
+
+            // 역추세 전략: RSI 과매도 구간 높은 점수 (엄격한 기준)
+            if (rsi < 25) {
+                signals.push({ title: 'RSI 극과매도 ★★★', value: `RSI ${rsi.toFixed(2)} - 강력한 반등 기회`, type: 'bullish' });
+                score += 35;
+            } else if (rsi < 30) {
+                signals.push({ title: 'RSI 과매도 ★★', value: `RSI ${rsi.toFixed(2)} - 매수 적기`, type: 'bullish' });
+                score += 25;
+            } else if (rsi < 35) {
+                signals.push({ title: 'RSI 저평가 ★', value: `RSI ${rsi.toFixed(2)} - 매수 관심`, type: 'bullish' });
+                score += 12;
+            } else if (rsi < 45) {
+                signals.push({ title: 'RSI 중립 하단', value: `RSI ${rsi.toFixed(2)} - 관망`, type: 'neutral' });
+                score += 0;
+            } else if (rsi > 70) {
+                signals.push({ title: 'RSI 과매수', value: `RSI ${rsi.toFixed(2)} - 진입 자제`, type: 'bearish' });
+                score -= 30;
+            } else if (rsi > 60) {
+                signals.push({ title: 'RSI 고평가', value: `RSI ${rsi.toFixed(2)} - 대기`, type: 'bearish' });
+                score -= 15;
+            } else if (rsi > 50) {
+                signals.push({ title: 'RSI 중립 상단', value: `RSI ${rsi.toFixed(2)} - 조정 대기`, type: 'neutral' });
+                score -= 5;
+            }
+
+            // 역추세: 볼린저밴드 하단 높은 점수 (엄격한 기준)
+            const bbPosition = ((currentPrice - bb.lower) / (bb.upper - bb.lower)) * 100;
+            if (currentPrice < bb.lower) {
+                signals.push({ title: '볼린저밴드 하단 돌파 ★★★', value: '극과매도 - 최우선 매수 시그널', type: 'bullish' });
+                score += 30;
+            } else if (bbPosition < 20) {
+                signals.push({ title: '볼린저밴드 하단 20% ★★', value: '과매도 구간 - 매수 적기', type: 'bullish' });
+                score += 18;
+            } else if (bbPosition < 30) {
+                signals.push({ title: '볼린저밴드 하단권', value: '저점 근접 - 관심', type: 'bullish' });
+                score += 8;
+            } else if (bbPosition > 80) {
+                signals.push({ title: '볼린저밴드 상단권', value: '과매수 - 진입 자제', type: 'bearish' });
+                score -= 20;
+            } else if (currentPrice > bb.upper) {
+                signals.push({ title: '볼린저밴드 상단 돌파', value: '극과매수 - 절대 회피', type: 'bearish' });
+                score -= 30;
+            }
+
+            // 역추세: 하락 후 반등 징후 찾기 (엄격한 기준)
+            if (priceChange < -15) {
+                signals.push({ title: '폭락 ★★★', value: `5일간 ${Math.abs(priceChange).toFixed(2)}% 하락 - 패닉셀 기회`, type: 'bullish' });
+                score += 25;
+            } else if (priceChange < -10) {
+                signals.push({ title: '급락 ★★', value: `5일간 ${Math.abs(priceChange).toFixed(2)}% 하락 - 반등 기회`, type: 'bullish' });
+                score += 18;
+            } else if (priceChange < -7) {
+                signals.push({ title: '조정 ★', value: `5일간 ${Math.abs(priceChange).toFixed(2)}% 하락 - 관심`, type: 'bullish' });
+                score += 10;
+            } else if (priceChange < -3) {
+                signals.push({ title: '소폭 하락', value: `5일간 ${Math.abs(priceChange).toFixed(2)}% 하락`, type: 'neutral' });
+                score += 3;
+            } else if (priceChange > 15) {
+                signals.push({ title: '급등', value: `5일간 ${priceChange.toFixed(2)}% 상승 - 절대 회피`, type: 'bearish' });
+                score -= 25;
+            } else if (priceChange > 10) {
+                signals.push({ title: '강한 상승', value: `5일간 ${priceChange.toFixed(2)}% 상승 - 고점 경계`, type: 'bearish' });
+                score -= 18;
+            } else if (priceChange > 5) {
+                signals.push({ title: '상승세', value: `5일간 ${priceChange.toFixed(2)}% 상승 - 진입 자제`, type: 'bearish' });
+                score -= 10;
+            }
+
+            // 역추세: 이평선 아래 = 매수 기회 (엄격한 기준)
+            if (currentPrice < ma20 && currentPrice < ma50) {
+                const gap = ((ma20 - currentPrice) / currentPrice * 100);
+                if (gap > 10) {
+                    signals.push({ title: '이평선 대비 급락 ★★★', value: `MA20 대비 ${gap.toFixed(1)}% 하락 - 저점 기회`, type: 'bullish' });
+                    score += 25;
+                } else if (gap > 7) {
+                    signals.push({ title: '이평선 대비 저평가 ★★', value: `MA20 대비 ${gap.toFixed(1)}% 하락 - 매수 고려`, type: 'bullish' });
+                    score += 18;
+                } else if (gap > 3) {
+                    signals.push({ title: '이평선 아래 ★', value: `MA20 대비 ${gap.toFixed(1)}% 하락`, type: 'bullish' });
+                    score += 10;
+                } else {
+                    signals.push({ title: '이평선 근처', value: '조정 미흡 - 관망', type: 'neutral' });
+                    score += 2;
+                }
+            } else if (currentPrice > ma20 && currentPrice > ma50) {
+                const gap = ((currentPrice - ma20) / ma20 * 100);
+                if (gap > 10) {
+                    signals.push({ title: '이평선 대비 급등', value: `MA20 대비 ${gap.toFixed(1)}% 상승 - 절대 회피`, type: 'bearish' });
+                    score -= 25;
+                } else if (gap > 5) {
+                    signals.push({ title: '이평선 위', value: `MA20 대비 ${gap.toFixed(1)}% 상승 - 진입 자제`, type: 'bearish' });
+                    score -= 12;
+                } else {
+                    signals.push({ title: '이평선 근처', value: '추격 신중', type: 'neutral' });
+                    score -= 5;
+                }
+            }
+
+            // 역추세: 역배열은 저점 매수 기회 (엄격한 기준)
+            if (ma5 < ma10 && ma10 < ma20 && ma20 < ma50) {
+                signals.push({ title: '완전 역배열 ★★', value: '하락 추세 - 분할 매수 기회', type: 'bullish' });
+                score += 18;
+            } else if (ma5 < ma20 && ma20 < ma50) {
+                signals.push({ title: '부분 역배열 ★', value: '약세 - 관심 구간', type: 'bullish' });
+                score += 8;
+            } else if (ma5 > ma10 && ma10 > ma20 && ma20 > ma50) {
+                signals.push({ title: '완전 정배열', value: '이미 상승 완료 - 절대 회피', type: 'bearish' });
+                score -= 20;
+            } else if (ma5 > ma20 && ma20 > ma50) {
+                signals.push({ title: '부분 정배열', value: '상승 추세 - 진입 자제', type: 'bearish' });
+                score -= 10;
+            }
+
+            // MACD: 하락 모멘텀 = 저점 근접 (엄격한 기준)
+            if (macd < -5) {
+                signals.push({ title: 'MACD 극단 음수 ★★', value: `MACD ${macd.toFixed(2)} - 바닥 근접`, type: 'bullish' });
+                score += 15;
+            } else if (macd < -2) {
+                signals.push({ title: 'MACD 강한 음수 ★', value: `MACD ${macd.toFixed(2)} - 약세 심화`, type: 'bullish' });
+                score += 8;
+            } else if (macd < 0) {
+                signals.push({ title: 'MACD 음수', value: `MACD ${macd.toFixed(2)} - 약세`, type: 'neutral' });
+                score += 3;
+            } else if (macd > 5) {
+                signals.push({ title: 'MACD 극단 양수', value: `MACD ${macd.toFixed(2)} - 절대 회피`, type: 'bearish' });
+                score -= 20;
+            } else if (macd > 2) {
+                signals.push({ title: 'MACD 강한 양수', value: `MACD ${macd.toFixed(2)} - 고점 경계`, type: 'bearish' });
+                score -= 12;
+            } else if (macd > 0) {
+                signals.push({ title: 'MACD 양수', value: `MACD ${macd.toFixed(2)} - 진입 자제`, type: 'bearish' });
+                score -= 5;
+            }
+
+            score = Math.max(0, Math.min(100, score));
+
+            let recommendation, signalClass, badgeClass, signalText;
+            if (score >= 70) {
+                recommendation = '저점 매수 적기';
+                signalClass = 'signal-strong-buy';
+                badgeClass = 'badge-strong-buy';
+                signalText = '💎 BOTTOM BUY';
+            } else if (score >= 55) {
+                recommendation = '분할 매수';
+                signalClass = 'signal-buy';
+                badgeClass = 'badge-buy';
+                signalText = '📊 SCALE IN';
+            } else if (score >= 40) {
+                recommendation = '관망/대기';
+                signalClass = 'signal-neutral';
+                badgeClass = 'badge-neutral';
+                signalText = '⏳ WAIT';
+            } else {
+                recommendation = '추가 하락 대기';
+                signalClass = 'signal-sell';
+                badgeClass = 'badge-sell';
+                signalText = '⛔ AVOID';
+            }
+
+            const scoreColor = score >= 70 ? '#4caf50' : score >= 55 ? '#8bc34a' : score >= 40 ? '#ff9800' : '#f44336';
+
+            const signalItemsHTML = signals.map(signal => `
+                <div class="signal-item ${signal.type}">
+                    <div class="signal-item-title">${signal.title}</div>
+                    <div class="signal-item-value">${signal.value}</div>
+                </div>
+            `).join('');
+
+            const recommendationHTML = `
+                <div class="recommendation">
+                    <h4>📋 역추세 매매 전략 (과매도 매수)</h4>
+                    <ul>
+                        ${score >= 70 ? `
+                            <li><strong>💎 저점 매수 적기:</strong> 과매도 시그널이 강합니다.</li>
+                            <li>2-3회로 분할하여 저점 매수를 시작하세요.</li>
+                            <li>추가 하락 시 물타기 여력을 남겨두세요.</li>
+                            <li>반등 시작 시 일부 익절로 평균 단가를 낮추세요.</li>
+                        ` : score >= 55 ? `
+                            <li><strong>📊 분할 매수 구간:</strong> 조정이 진행 중입니다.</li>
+                            <li>1차 소량 매수 후 추가 하락 관찰하세요.</li>
+                            <li>RSI 30 이하나 볼린저밴드 하단 돌파 시 추가 매수.</li>
+                            <li>평균 단가를 고려한 분할 매수 전략 권장.</li>
+                        ` : score >= 40 ? `
+                            <li><strong>⏳ 관망/대기:</strong> 아직 명확한 저점이 아닙니다.</li>
+                            <li>추가 하락 여지가 있어 성급한 매수는 위험합니다.</li>
+                            <li>과매도 시그널이 나올 때까지 대기 권장.</li>
+                            <li>급락(-10% 이상) 발생 시 재분석하세요.</li>
+                        ` : `
+                            <li><strong>⛔ 추가 하락 대기:</strong> 현재 고평가 구간입니다.</li>
+                            <li>역추세 매매는 저점에서만 유효하므로 진입 자제.</li>
+                            <li>조정이 충분히 진행된 후 재검토하세요.</li>
+                            <li>RSI 60 이하, 볼린저밴드 중간 이하로 하락 대기.</li>
+                        `}
+                    </ul>
+                    <p style="margin-top: 15px; color: #666; font-size: 0.9em;">
+                        ⚠️ 이 분석은 <strong>역추세(과매도 매수)</strong> 전략 기준입니다.
+                        투자 결정은 본인의 판단과 책임 하에 이루어져야 합니다.
+                    </p>
+                </div>
+            `;
+
+            const html = `
+                <div class="signal-panel ${signalClass}">
+                    <div class="signal-header">
+                        <div class="signal-title">💡 역추세 매매 시그널 (과매도 매수)</div>
+                        <div class="signal-badge ${badgeClass}">${signalText}</div>
+                    </div>
+                    <div class="signal-score">
+                        <div class="score-circle" style="background: ${scoreColor}">
+                            ${score}
+                        </div>
+                        <p style="margin-top: 10px; font-size: 1.2em; color: #333;">
+                            <strong>${recommendation}</strong> (100점 만점 중 ${score}점)
+                        </p>
+                    </div>
+                    <div class="signal-details">
+                        ${signalItemsHTML}
+                    </div>
+                    ${recommendationHTML}
+                </div>
+            `;
+
+            return { html, score, recommendation, signals };
+        }
+
+        function drawChart(data) {
+            const canvas = document.getElementById('priceChart');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+
+            const prices = data.historicalPrices;
+            const padding = 40;
+            const chartWidth = canvas.width - padding * 2;
+            const chartHeight = canvas.height - padding * 2;
+
+            const maxPrice = Math.max(...prices);
+            const minPrice = Math.min(...prices);
+            const priceRange = maxPrice - minPrice;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = padding + (chartHeight / 5) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(canvas.width - padding, y);
+                ctx.stroke();
+
+                const price = maxPrice - (priceRange / 5) * i;
+                ctx.fillStyle = '#666';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'right';
+                ctx.fillText(`$${price.toFixed(2)}`, padding - 10, y + 4);
+            }
+
+            ctx.strokeStyle = '#2a5298';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+
+            prices.forEach((price, index) => {
+                const x = padding + (chartWidth / (prices.length - 1)) * index;
+                const y = padding + chartHeight - ((price - minPrice) / priceRange) * chartHeight;
+
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+
+            ctx.stroke();
+
+            const gradient = ctx.createLinearGradient(0, padding, 0, canvas.height - padding);
+            gradient.addColorStop(0, 'rgba(42, 82, 152, 0.3)');
+            gradient.addColorStop(1, 'rgba(42, 82, 152, 0.05)');
+
+            ctx.fillStyle = gradient;
+            ctx.lineTo(canvas.width - padding, canvas.height - padding);
+            ctx.lineTo(padding, canvas.height - padding);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#666';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            const step = Math.max(1, Math.floor(prices.length / 6));
+            for (let i = 0; i < prices.length; i += step) {
+                const x = padding + (chartWidth / (prices.length - 1)) * i;
+                ctx.fillText(`-${prices.length - i}d`, x, canvas.height - padding + 20);
+            }
+        }
+
+        function formatNumber(num) {
+            return Math.round(num).toLocaleString('en-US');
+        }
+
+        document.getElementById('stockInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchStock();
+            }
+        });
+    </script>
+</body>
+</html>
