@@ -1,0 +1,7 @@
+google-cloud-sdk/
+*.bat
+uninstaller.exe
+install_mode
+supercloud-16x16.ico
+.gemini/
+.geminiignore
