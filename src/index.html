@@ -62,47 +62,9 @@
         .data-val.active { color: var(--primary); }
 
         table { width: 100%; border-collapse: collapse; margin-top: 24px; table-layout: fixed; }
-        .table-container { width: 100%; border-radius: 12px; }
+        .table-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; }
         th { text-align: left; padding: 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 2px solid #f1f5f9; font-weight: 800; }
         td { padding: 24px 16px; border-bottom: 1px solid #f1f5f9; font-weight: 800; font-size: 1rem; }
-
-        /* Mobile Table to Card Transformation */
-        @media (max-width: 600px) {
-            .table-container table, .table-container thead, .table-container tbody, .table-container th, .table-container td, .table-container tr { 
-                display: block; 
-            }
-            .table-container thead { display: none; } /* 헤더 숨김 */
-            .table-container tr { 
-                margin-bottom: 16px; 
-                background: #f8fafc; 
-                border: 1px solid var(--border); 
-                border-radius: 20px; 
-                padding: 16px;
-            }
-            .table-container td { 
-                display: flex; 
-                justify-content: space-between; 
-                align-items: center; 
-                padding: 10px 0; 
-                border-bottom: 1px solid rgba(0,0,0,0.03);
-                font-size: 0.95rem;
-            }
-            .table-container td:last-child { border-bottom: none; }
-            .table-container td::before { 
-                content: attr(data-label); 
-                font-weight: 700; 
-                color: var(--text-muted); 
-                font-size: 0.8rem;
-            }
-            /* 최종 결과 행 스타일 */
-            .table-container tr:last-child { 
-                background: var(--primary); 
-                color: white; 
-                border: none;
-            }
-            .table-container tr:last-child td { color: white; border-bottom: 1px solid rgba(255,255,255,0.1); }
-            .table-container tr:last-child td::before { color: rgba(255,255,255,0.7); }
-        }
 
         /* Score Styling */
         .score-card { background: var(--card); color: var(--text-main); border: 1px solid var(--border); grid-column: 1 / -1; }
@@ -163,19 +125,13 @@
             .quick-gate { gap: 8px; margin-top: 24px; }
             .gate-card { width: calc(33.33% - 6px); padding: 8px; border-radius: 16px; }
             .gate-card img { width: 36px; height: 36px; padding: 6px; }
-            .simulation-header { flex-direction: column; gap: 16px !important; margin-bottom: 32px !important; }
-            .simulation-header > div { 
-                width: 100%; 
-                background: #f8fafc; 
-                padding: 16px !important; 
-                border-radius: 20px !important; 
-                justify-content: space-between !important;
-                flex-direction: row !important;
-                display: flex !important;
-            }
-            .simulation-header label { font-size: 0.8rem !important; }
-            #cashInput { width: 120px !important; padding: 8px 12px !important; font-size: 1rem !important; }
-            #stepSelect { padding: 6px 10px !important; font-size: 0.9rem !important; }
+            .simulation-header { flex-direction: column; align-items: stretch !important; gap: 12px !important; margin-bottom: 24px !important; }
+            .simulation-header > div { width: 100%; justify-content: space-between; padding: 10px 14px !important; font-size: 0.85rem; }
+            input, button { padding: 14px 16px; font-size: 0.95rem; }
+            #cashInput { width: 100px !important; padding: 6px 10px !important; }
+            .data-row { padding: 14px 0; }
+            .data-lab { font-size: 0.9rem; }
+            .data-val { font-size: 1rem; }
         }
 
         @keyframes float {
@@ -660,12 +616,12 @@
                 
                 html += `
                     <tr>
-                        <td data-label="진입 단계">${i + 1}차 매수</td>
-                        <td data-label="전략적 근거" style="color:var(--text-sub); font-weight:500;">${i === 0 ? strategyName : reasons[i]}</td>
-                        <td data-label="진입 목표가">$${targetPrice.toFixed(2)}</td>
-                        <td data-label="비중" style="color:var(--primary)">${(weights[i]*100).toFixed(0)}%</td>
-                        <td data-label="투자 금액" style="font-weight:800;">$${amount.toLocaleString(undefined, {maximumFractionDigits:0})}</td>
-                        <td data-label="예상 수량" style="color:var(--primary)">${qty.toFixed(2)} 주</td>
+                        <td>${i + 1}차 매수</td>
+                        <td style="color:var(--text-sub); font-weight:500;">${i === 0 ? strategyName : reasons[i]}</td>
+                        <td>$${targetPrice.toFixed(2)}</td>
+                        <td style="color:var(--primary)">${(weights[i]*100).toFixed(0)}%</td>
+                        <td style="font-weight:800;">$${amount.toLocaleString(undefined, {maximumFractionDigits:0})}</td>
+                        <td style="color:var(--primary)">${qty.toFixed(2)} 주</td>
                     </tr>
                 `;
             }
@@ -675,12 +631,13 @@
 
             html += `
                 <tr style="background:var(--bg); border-top:2px solid var(--primary);">
-                    <td data-label="최종 결과" style="font-weight:900; color:var(--text-main);">평균 단가</td>
-                    <td data-label="최종 수량" style="font-weight:900; color:var(--text-main);">총 수량</td>
-                    <td data-label="평단가 결과" style="color:var(--primary); font-size:1.3rem;">$${avgPrice.toFixed(2)}</td>
-                    <td data-label="총수량 결과" style="color:var(--text-main); font-size:1.3rem;">${totalQty.toFixed(2)} 주</td>
-                    <td colspan="2" data-label="안전 마진" style="text-align:center; font-weight:700; color:var(--up); padding:15px; font-size:0.95rem;">
-                        현재가 대비 약 ${downPct}% 방어
+                    <td colspan="2" style="text-align:center; font-weight:900; color:var(--text-main); font-size:1.1rem;">시뮬레이션 최종 결과</td>
+                    <td colspan="2" style="text-align:right; font-weight:800; color:var(--text-sub);">평균 단가: <span style="color:var(--primary); font-size:1.3rem; margin-left:10px;">$${avgPrice.toFixed(2)}</span></td>
+                    <td colspan="2" style="text-align:right; font-weight:800; color:var(--text-sub);">총 수량: <span style="color:var(--text-main); font-size:1.3rem; margin-left:10px;">${totalQty.toFixed(2)} 주</span></td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align:center; font-weight:700; color:var(--up); padding:15px; font-size:0.95rem;">
+                        💡 현재가 대비 약 <span style="text-decoration:underline;">${downPct}%</span> 낮은 가격에 매집이 완료됩니다. (목표 도달 시)
                     </td>
                 </tr>
             `;
