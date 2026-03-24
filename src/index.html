@@ -12,13 +12,18 @@
             --up: #10b981; --down: #ef4444; --border: #e2e8f0;
             --grid: rgba(0, 82, 255, 0.03);
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+        html, body { 
+            width: 100%;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
         body { 
             font-family: 'Pretendard', sans-serif; background-color: var(--bg);
             background-image: radial-gradient(var(--grid) 1px, transparent 1px);
             background-size: 24px 24px; color: var(--text-main); line-height: 1.6; letter-spacing: -0.02em; 
         }
-        .container { max-width: 1100px; margin: 0 auto; padding: 60px 24px; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 60px 24px; position: relative; }
         header { margin-bottom: 48px; text-align: center; }
         .brand { font-size: 3.2rem; font-weight: 400; color: var(--text-main); letter-spacing: -0.06em; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; }
         .brand span { color: var(--primary); font-weight: 900; }
@@ -53,7 +58,8 @@
         .data-val { font-weight: 900; font-size: 1.1rem; }
         .data-val.active { color: var(--primary); }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 24px; min-width: 600px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 24px; min-width: 600px; table-layout: fixed; }
+        .table-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; }
         th { text-align: left; padding: 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 2px solid #f1f5f9; font-weight: 800; }
         td { padding: 24px 16px; border-bottom: 1px solid #f1f5f9; font-weight: 800; font-size: 1rem; }
 
@@ -483,7 +489,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div style="overflow-x:auto;">
+                        <div class="table-container">
                             <table>
                                 <thead>
                                     <tr><th>진입 단계</th><th>전략적 근거</th><th>진입 목표가</th><th>비중</th><th>투자 금액</th><th>예상 수량</th></tr>
