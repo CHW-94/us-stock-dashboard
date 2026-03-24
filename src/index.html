@@ -12,24 +12,27 @@
             --up: #10b981; --down: #ef4444; --border: #e2e8f0;
             --grid: rgba(0, 82, 255, 0.03);
         }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
         html, body { 
             width: 100%;
+            max-width: 100%;
             overflow-x: hidden;
             margin: 0;
             padding: 0;
+            position: relative;
         }
         body { 
             font-family: 'Pretendard', sans-serif; background-color: var(--bg);
             background-image: radial-gradient(var(--grid) 1px, transparent 1px);
             background-size: 24px 24px; color: var(--text-main); line-height: 1.6; letter-spacing: -0.02em; 
         }
-        .container { max-width: 1100px; margin: 0 auto; padding: 60px 24px; position: relative; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 60px 24px; position: relative; width: 100%; }
         header { margin-bottom: 48px; text-align: center; }
         .brand { font-size: 3.2rem; font-weight: 400; color: var(--text-main); letter-spacing: -0.06em; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; }
         .brand span { color: var(--primary); font-weight: 900; }
         .subtitle { color: var(--text-sub); font-size: 1.1rem; font-weight: 600; }
 
-        .platform-card { background: var(--card); padding: 40px; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05); border: 1px solid var(--border); margin-bottom: 48px; }
+        .platform-card { background: var(--card); padding: 40px; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05); border: 1px solid var(--border); margin-bottom: 48px; width: 100%; }
         .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
         .label-group { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
         .label-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; }
@@ -41,8 +44,8 @@
         button:hover { background: var(--primary-deep); transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0, 82, 255, 0.2); }
         button.secondary { background: #f1f5f9; color: var(--text-main); border: 1px solid #e2e8f0; }
 
-        .report-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
-        .analysis-card { background: white; border-radius: 32px; padding: 40px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
+        .report-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; width: 100%; }
+        .analysis-card { background: white; border-radius: 32px; padding: 40px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.02); min-width: 0; overflow: hidden; }
         .full-width { grid-column: 1 / -1; }
 
         .meta-tag { font-size: 1.1rem; font-weight: 800; color: var(--primary); margin-bottom: 8px; letter-spacing: 0.05em; }
@@ -58,7 +61,7 @@
         .data-val { font-weight: 900; font-size: 1.1rem; }
         .data-val.active { color: var(--primary); }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 24px; min-width: 600px; table-layout: fixed; }
+        table { width: 100%; border-collapse: collapse; margin-top: 24px; table-layout: fixed; }
         .table-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; }
         th { text-align: left; padding: 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 2px solid #f1f5f9; font-weight: 800; }
         td { padding: 24px 16px; border-bottom: 1px solid #f1f5f9; font-weight: 800; font-size: 1rem; }
@@ -69,7 +72,7 @@
         
         .score-layout { display: flex; align-items: center; gap: 48px; margin-top: 16px; }
         .score-left { flex: 0 0 240px; text-align: center; border-right: 1px solid var(--border); padding-right: 48px; }
-        .score-right { flex: 1; }
+        .score-right { flex: 1; min-width: 0; }
         
         .score-ring-container { position: relative; width: 160px; height: 160px; margin: 0 auto 24px; }
         .score-ring { width: 100%; height: 100%; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f1f5f9; transition: all 0.5s ease; }
@@ -102,7 +105,8 @@
         }
 
         @media (max-width: 480px) {
-            .container { padding: 24px 12px; }
+            html, body { overflow-x: hidden; position: relative; }
+            .container { padding: 24px 12px; width: 100%; max-width: 100vw; overflow-x: hidden; }
             .brand { font-size: 2rem; }
             .subtitle { font-size: 0.9rem; }
             .price-hero { font-size: 2.4rem; margin: 12px 0; word-break: break-all; }
@@ -113,8 +117,10 @@
             .score-ring .num { font-size: 2.8rem; }
             .score-header { font-size: 0.8rem; flex-direction: column; align-items: flex-start; gap: 4px; }
             .score-val-text { font-size: 0.85rem; }
-            .platform-card { padding: 20px 14px; border-radius: 20px; margin-bottom: 24px; }
-            .analysis-card { padding: 20px 14px; border-radius: 20px; }
+            .platform-card { padding: 20px 14px; border-radius: 20px; margin-bottom: 24px; width: 100%; }
+            .analysis-card { padding: 20px 14px; border-radius: 20px; width: 100%; }
+            table { min-width: 500px; }
+            .table-container { width: 100%; }
             th, td { padding: 10px 8px; font-size: 0.8rem; }
             .quick-gate { gap: 8px; margin-top: 24px; }
             .gate-card { width: calc(33.33% - 6px); padding: 8px; border-radius: 16px; }
