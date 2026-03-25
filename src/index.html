@@ -197,7 +197,15 @@
                     <button class="secondary" onclick="saveKey()">API KEY 저장</button>
                 </div>
                 <div>
-                    <div class="label-group"><div class="label-dot" style="background:var(--up)"></div><label class="field-label">TICKER SEARCH</label></div>
+                    <div class="label-group" style="justify-content: space-between; width: 100%;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div class="label-dot" style="background:var(--up)"></div><label class="field-label">TICKER SEARCH</label>
+                        </div>
+                        <select id="valMode" style="border: none; background: #e2e8f0; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; color: var(--text-sub); cursor: pointer; outline: none; transition: 0.2s;">
+                            <option value="standard" selected>스탠다드 우량주 모드</option>
+                            <option value="hyper">하이퍼 그로스 모드 (AI)</option>
+                        </select>
+                    </div>
                     <input type="text" id="tickerInput" placeholder="TICKER (예: NVDA, TSLA)" onkeypress="if(event.key==='Enter') runAnalysis()" />
                     <button onclick="runAnalysis()">분석</button>
                 </div>
@@ -283,9 +291,12 @@
                 
                 const q = qData[0];
                 const r = (Array.isArray(rData) && rData.length > 0) ? rData[0] : {};
-                const history = Array.isArray(hData) ? hData : [];
+                let history = [];
+                if (Array.isArray(hData)) history = hData;
+                else if (hData && Array.isArray(hData.historical)) history = hData.historical;
 
-                renderReport(q, r, history);
+                const valMode = document.getElementById('valMode').value;
+                renderReport(q, r, history, valMode);
 
             } catch (err) {
                 console.error("ANALYSIS ERROR:", err);
@@ -309,18 +320,42 @@
 
             const len = prices.length;
 
-            // 1. RSI (14)
+            // 1. 표준 RSI (14) - Wilder's Smoothing Method
             let rsi = 50;
-            if (len >= 15) {
-                let gains = 0, losses = 0;
-                for (let i = len - 14; i < len; i++) {
+            const periodRSI = 14;
+            
+            if (len > periodRSI) {
+                let avgGain = 0;
+                let avgLoss = 0;
+
+                // (1) 첫 14일: 단순 평균(SMA) 계산
+                for (let i = 1; i <= periodRSI; i++) {
                     const diff = prices[i] - prices[i - 1];
-                    if (diff >= 0) gains += diff; else losses -= diff;
+                    if (diff >= 0) avgGain += diff;
+                    else avgLoss -= diff;
                 }
-                const avgGain = gains / 14;
-                const avgLoss = losses / 14;
-                const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
-                rsi = 100 - (100 / (1 + rs));
+                avgGain /= periodRSI;
+                avgLoss /= periodRSI;
+
+                // (2) 15일째부터 최신 날짜까지 평활화(SMMA) 적용
+                for (let i = periodRSI + 1; i < len; i++) {
+                    const diff = prices[i] - prices[i - 1];
+                    let currentGain = 0, currentLoss = 0;
+                    
+                    if (diff >= 0) currentGain = diff;
+                    else currentLoss = -diff;
+
+                    avgGain = ((avgGain * (periodRSI - 1)) + currentGain) / periodRSI;
+                    avgLoss = ((avgLoss * (periodRSI - 1)) + currentLoss) / periodRSI;
+                }
+
+                // (3) RSI 최종 산출
+                if (avgLoss === 0) {
+                    rsi = 100;
+                } else {
+                    const rs = avgGain / avgLoss;
+                    rsi = 100 - (100 / (1 + rs));
+                }
             }
 
             // 2. Bollinger Bands (20, 2)
@@ -340,7 +375,7 @@
             return { rsi, sma20, lowerBB, upperBB, pctB, ma200 };
         }
 
-        function calculateReverseScore(q, r, history) {
+        function calculateReverseScore(q, r, history, valMode) {
             const price = q?.price || 0;
             const tech = calculateTechnicalMetrics(history, price);
             let detail = { rsi: 0, bb: 0, ma200: 0, mdd: 0, val: 0 };
@@ -371,25 +406,41 @@
             else detail.mdd = Math.max(0, (Math.abs(mdd) - 0.1) * 333);
 
             // 5. Valuation Score (30% Weight) - Growth Stock Optimized
-            const pe = r?.priceToEarningsRatio || q?.pe || 35;
-            const peg = r?.priceEarningsToGrowthRatio || 1.5;
-            const pb = r?.priceToBookRatio || 3;
+            // 증권사와 동일한 실시간 TTM PER 산출 (최근 1년 순이익 기준 현재주가), 값 누락 시 과거 ratios로 폴백
+            const pe = (q?.eps && q.eps !== 0) ? (q.price / q.eps) : (q?.pe || r?.priceToEarningsRatio);
+            const psr = r?.priceToSalesRatio;
+            const pb = r?.priceToBookRatio;
             
             let valScore = 0;
-            // Growth PER: < 25 (Great), < 45 (Fair)
-            if(pe < 25) valScore += 50; else if(pe < 45) valScore += 25;
-            // PEG: < 1.2 (Underpriced), < 2.0 (Reasonable)
-            if(peg < 1.2) valScore += 50; else if(peg < 2.0) valScore += 25;
+            if (valMode === 'hyper') {
+                // Hyper-Growth 모드: 고성장주의 고평가 프리미엄 여유폭 허용 (PER 80, PSR 20)
+                if(pe > 0 && pe < 35) valScore += 50; 
+                else if(pe > 0 && pe < 80) valScore += 25;
+                else if(pe === undefined || pe === null) valScore += 12.5;
+
+                if(psr > 0 && psr < 10.0) valScore += 50; 
+                else if(psr > 0 && psr < 20.0) valScore += 25;
+                else if(psr === undefined || psr === null) valScore += 12.5;
+            } else {
+                // Standard 모드: 애플, 은행 등 전통/스탠다드 우량주를 위한 깐깐한 가치기준 (PER 35, PSR 8)
+                if(pe > 0 && pe < 20) valScore += 50; 
+                else if(pe > 0 && pe < 35) valScore += 25;
+                else if(pe === undefined || pe === null) valScore += 12.5;
+
+                if(psr > 0 && psr < 4.0) valScore += 50; 
+                else if(psr > 0 && psr < 8.0) valScore += 25;
+                else if(psr === undefined || psr === null) valScore += 12.5;
+            }
             
             detail.val = valScore;
 
             // Weighted Total Score
             const total = (detail.rsi * 0.10) + (detail.bb * 0.15) + (detail.ma200 * 0.25) + (detail.mdd * 0.20) + (detail.val * 0.30);
-            return { total, detail, tech, mdd, pe, pb, peg };
+            return { total, detail, tech, mdd, pe: pe || 0, pb: pb || 0, psr: psr || 0 };
         }
 
-        function renderReport(q, r, history) {
-            const scoreData = calculateReverseScore(q, r, history);
+        function renderReport(q, r, history, valMode = 'standard') {
+            const scoreData = calculateReverseScore(q, r, history, valMode);
             window.currentScoreData = { ...scoreData, q }; // 데이터 인텔리전스 공유
             const result = document.getElementById('result');
             
@@ -427,8 +478,9 @@
             const dynamicColor = getDynamicColor(scoreData.total);
             const grade = getGrade(scoreData.total);
 
+            // 증권사 제공 TTM PER과 일치하도록 실시간 계산 적용, 누락 시 폴백
+            const peVal = (q?.eps && q.eps !== 0) ? (q.price / q.eps) : (q?.pe || r?.priceToEarningsRatio);
             // ROE 직접 계산 (ROE = PBR / PER)
-            const peVal = r?.priceToEarningsRatio || q?.pe;
             const pbVal = r?.priceToBookRatio;
             const calculatedRoe = (peVal && pbVal && peVal !== 0) ? (pbVal / peVal) : r?.returnOnEquity;
 
@@ -456,7 +508,7 @@
                         <div style="margin-top:24px;">
                             <div class="data-row"><span class="data-lab">PER (주가수익비율)</span><span class="data-val" style="color:var(--primary)">${fmt(peVal, 1)}</span></div>
                             <div class="data-row"><span class="data-lab">PBR (주가순자산비율)</span><span class="data-val" style="color:var(--primary)">${fmt(pbVal, 1)}</span></div>
-                            <div class="data-row"><span class="data-lab">PEG (주가이익성장비율)</span><span class="data-val" style="color:var(--primary)">${fmt(r?.priceEarningsToGrowthRatio || scoreData.peg, 2)}</span></div>
+                            <div class="data-row"><span class="data-lab">PSR (주가매출비율)</span><span class="data-val" style="color:var(--primary)">${fmt(r?.priceToSalesRatio || scoreData.psr, 2)}</span></div>
                             <div class="data-row"><span class="data-lab">영업이익률</span><span class="data-val">${fmt(r?.operatingProfitMargin, 1, true)}</span></div>
                             <div class="data-row"><span class="data-lab">순이익률</span><span class="data-val">${fmt(r?.netProfitMargin, 1, true)}</span></div>
                             <div class="data-row"><span class="data-lab">자기자본이익률(ROE)</span><span class="data-val" style="color:var(--primary)">${fmt(calculatedRoe, 1, true)}</span></div>
@@ -479,7 +531,7 @@
                             </div>
                             <div class="score-right">
                                 ${[
-                                    { lab: 'Growth Value (PEG/PER)', val: scoreData.detail.val, raw: `PEG ${scoreData.peg.toFixed(2)} / PER ${scoreData.pe.toFixed(1)}`, w: '30%' },
+                                    { lab: 'Growth Value (PSR/PER)', val: scoreData.detail.val, raw: `PSR ${scoreData.psr ? scoreData.psr.toFixed(2) : 'N/A'} / PER ${scoreData.pe ? scoreData.pe.toFixed(1) : 'N/A'}`, w: '30%' },
                                     { lab: 'MA200 이격도 (장기)', val: scoreData.detail.ma200, raw: (((price - scoreData.tech.ma200)/scoreData.tech.ma200)*100).toFixed(1) + '%', w: '25%' },
                                     { lab: '52주 MDD (낙폭)', val: scoreData.detail.mdd, raw: (scoreData.mdd * 100).toFixed(1) + '%', w: '20%' },
                                     { lab: '볼린저 밴드 (단기)', val: scoreData.detail.bb, raw: (scoreData.tech.pctB * 100).toFixed(1) + '%', w: '15%' },
@@ -587,6 +639,9 @@
             let firstTarget = price;
             if (isLow) firstTarget = sd.tech.lowerBB || price * 0.92; // C: 볼린저 하단까지 대기
             else if (score < 65) firstTarget = (price + (sd.tech.lowerBB || price * 0.95)) / 2; // B: 중간 지점 대기
+            
+            // 타겟가가 현재가보다 높으면 현재가로 제한 (폭락하여 하단 밴드 밑에 있는 경우 방어)
+            firstTarget = Math.min(price, firstTarget);
 
             // 2. 기술적 지지선 베이스 설계
             const techTargets = [
