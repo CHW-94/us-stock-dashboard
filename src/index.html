@@ -1,19 +1,36 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StockInsight - 인텔리전트 미국 주식 분석 플랫폼</title>
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <style>
-        :root { 
-            --bg: #f8fafc; --card: #ffffff; --primary: #0052ff; --primary-deep: #003ad2;
-            --text-main: #0f172a; --text-sub: #475569; --text-muted: #94a3b8;
-            --up: #10b981; --down: #ef4444; --border: #e2e8f0;
+        :root {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --primary: #0052ff;
+            --primary-deep: #003ad2;
+            --text-main: #0f172a;
+            --text-sub: #475569;
+            --text-muted: #94a3b8;
+            --up: #10b981;
+            --down: #ef4444;
+            --border: #e2e8f0;
             --grid: rgba(0, 82, 255, 0.03);
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
-        html, body { 
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        html,
+        body {
             width: 100%;
             max-width: 100%;
             overflow-x: hidden;
@@ -21,167 +38,726 @@
             padding: 0;
             position: relative;
         }
-        body { 
-            font-family: 'Pretendard', sans-serif; background-color: var(--bg);
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: var(--bg);
             background-image: radial-gradient(var(--grid) 1px, transparent 1px);
-            background-size: 24px 24px; color: var(--text-main); line-height: 1.6; letter-spacing: -0.02em; 
+            background-size: 24px 24px;
+            color: var(--text-main);
+            line-height: 1.6;
+            letter-spacing: -0.02em;
         }
-        .container { max-width: 1100px; margin: 0 auto; padding: 60px 24px; position: relative; width: 100%; }
-        header { margin-bottom: 48px; text-align: center; }
-        .brand { font-size: 3.2rem; font-weight: 400; color: var(--text-main); letter-spacing: -0.06em; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; }
-        .brand span { color: var(--primary); font-weight: 900; }
-        .subtitle { color: var(--text-sub); font-size: 1.1rem; font-weight: 600; }
 
-        .platform-card { background: var(--card); padding: 40px; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05); border: 1px solid var(--border); margin-bottom: 48px; width: 100%; }
-        .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
-        .label-group { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-        .label-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; }
-        .field-label { font-size: 0.85rem; font-weight: 800; color: var(--text-main); text-transform: uppercase; }
-        
-        input { width: 100%; padding: 18px 24px; background: #f8fafc; border: 2px solid #f1f5f9; border-radius: 18px; font-size: 1rem; font-weight: 600; transition: 0.3s; }
-        input:focus { outline: none; background: #fff; border-color: var(--primary); box-shadow: 0 0 0 8px rgba(0, 82, 255, 0.05); }
-        button { width: 100%; padding: 18px; background: var(--primary); color: white; border: none; border-radius: 18px; font-size: 1.1rem; font-weight: 800; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); margin-top: 16px; }
-        button:hover { background: var(--primary-deep); transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0, 82, 255, 0.2); }
-        button.secondary { background: #f1f5f9; color: var(--text-main); border: 1px solid #e2e8f0; }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 60px 24px;
+            position: relative;
+            width: 100%;
+        }
 
-        .report-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; width: 100%; }
-        .analysis-card { background: white; border-radius: 32px; padding: 40px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.02); min-width: 0; overflow: hidden; }
-        .full-width { grid-column: 1 / -1; }
+        header {
+            margin-bottom: 48px;
+            text-align: center;
+        }
 
-        .meta-tag { font-size: 1.1rem; font-weight: 800; color: var(--primary); margin-bottom: 8px; letter-spacing: 0.05em; }
-        .company-title { font-size: 2rem; font-weight: 900; margin-bottom: 6px; letter-spacing: -0.04em; }
-        .price-hero { font-size: 4.2rem; font-weight: 900; letter-spacing: -0.07em; margin: 24px 0; }
-        .status-pill { display: inline-flex; align-items: center; padding: 10px 20px; border-radius: 100px; font-weight: 900; font-size: 1.1rem; }
-        .status-pill.up { color: var(--up); background: #f0fdf4; }
-        .status-pill.down { color: var(--down); background: #fff1f0; }
+        .brand {
+            font-size: 3.2rem;
+            font-weight: 400;
+            color: var(--text-main);
+            letter-spacing: -0.06em;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-        .data-row { display: flex; justify-content: space-between; padding: 18px 0; border-bottom: 1px solid #f1f5f9; }
-        .data-row:last-child { border-bottom: none; }
-        .data-lab { color: var(--text-sub); font-weight: 600; font-size: 1rem; }
-        .data-val { font-weight: 900; font-size: 1.1rem; }
-        .data-val.active { color: var(--primary); }
+        .brand span {
+            color: var(--primary);
+            font-weight: 900;
+        }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 24px; table-layout: fixed; }
-        .table-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; }
-        th { text-align: left; padding: 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 2px solid #f1f5f9; font-weight: 800; }
-        td { padding: 24px 16px; border-bottom: 1px solid #f1f5f9; font-weight: 800; font-size: 1rem; }
+        .subtitle {
+            color: var(--text-sub);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .platform-card {
+            background: var(--card);
+            padding: 40px;
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+            margin-bottom: 48px;
+            width: 100%;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+        }
+
+        .label-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .label-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+        }
+
+        .field-label {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-transform: uppercase;
+        }
+
+        input {
+            width: 100%;
+            padding: 18px 24px;
+            background: #f8fafc;
+            border: 2px solid #f1f5f9;
+            border-radius: 18px;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            background: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 8px rgba(0, 82, 255, 0.05);
+        }
+
+        button {
+            width: 100%;
+            padding: 18px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 18px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 16px;
+        }
+
+        button:hover {
+            background: var(--primary-deep);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0, 82, 255, 0.2);
+        }
+
+        button.secondary {
+            background: #f1f5f9;
+            color: var(--text-main);
+            border: 1px solid #e2e8f0;
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            width: 100%;
+        }
+
+        .analysis-card {
+            background: white;
+            border-radius: 32px;
+            padding: 40px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .meta-tag {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 8px;
+            letter-spacing: 0.05em;
+        }
+
+        .company-title {
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 6px;
+            letter-spacing: -0.04em;
+        }
+
+        .price-hero {
+            font-size: 4.2rem;
+            font-weight: 900;
+            letter-spacing: -0.07em;
+            margin: 24px 0;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            border-radius: 100px;
+            font-weight: 900;
+            font-size: 1.1rem;
+        }
+
+        .status-pill.up {
+            color: var(--up);
+            background: #f0fdf4;
+        }
+
+        .status-pill.down {
+            color: var(--down);
+            background: #fff1f0;
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 18px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .data-row:last-child {
+            border-bottom: none;
+        }
+
+        .data-lab {
+            color: var(--text-sub);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .data-val {
+            font-weight: 900;
+            font-size: 1.1rem;
+        }
+
+        .data-val.active {
+            color: var(--primary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 24px;
+            table-layout: fixed;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 12px;
+        }
+
+        th {
+            text-align: left;
+            padding: 16px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-bottom: 2px solid #f1f5f9;
+            font-weight: 800;
+        }
+
+        td {
+            padding: 24px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            font-weight: 800;
+            font-size: 1rem;
+        }
 
         /* Score Styling */
-        .score-card { background: var(--card); color: var(--text-main); border: 1px solid var(--border); grid-column: 1 / -1; }
-        .score-card .meta-tag { color: var(--primary); }
-        
-        .score-layout { display: flex; align-items: center; gap: 48px; margin-top: 16px; }
-        .score-left { flex: 0 0 240px; text-align: center; border-right: 1px solid var(--border); padding-right: 48px; }
-        .score-right { flex: 1; min-width: 0; }
-        
-        .score-ring-container { position: relative; width: 160px; height: 160px; margin: 0 auto 24px; }
-        .score-ring { width: 100%; height: 100%; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f1f5f9; transition: all 0.5s ease; }
-        .score-ring.colored { color: white; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); }
-        .score-ring .num { font-size: 3.8rem; font-weight: 900; line-height: 1; }
-        .score-ring .unit { font-size: 0.9rem; font-weight: 800; opacity: 0.8; margin-top: 2px; }
-        
-        .score-item { margin-bottom: 20px; }
-        .score-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem; font-weight: 700; }
-        .score-track { width: 100%; height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
-        .score-fill { height: 100%; transition: width 1s ease-out; }
-        .score-val-text { font-weight: 900; font-size: 1rem; }
+        .score-card {
+            background: var(--card);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            grid-column: 1 / -1;
+        }
+
+        .score-card .meta-tag {
+            color: var(--primary);
+        }
+
+        .score-layout {
+            display: flex;
+            align-items: center;
+            gap: 48px;
+            margin-top: 16px;
+        }
+
+        .score-left {
+            flex: 0 0 240px;
+            text-align: center;
+            border-right: 1px solid var(--border);
+            padding-right: 48px;
+        }
+
+        .score-right {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .score-ring-container {
+            position: relative;
+            width: 160px;
+            height: 160px;
+            margin: 0 auto 24px;
+        }
+
+        .score-ring {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #f1f5f9;
+            transition: all 0.5s ease;
+        }
+
+        .score-ring.colored {
+            color: white;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+        }
+
+        .score-ring .num {
+            font-size: 3.8rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .score-ring .unit {
+            font-size: 0.9rem;
+            font-weight: 800;
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+
+        .score-item {
+            margin-bottom: 20px;
+        }
+
+        .score-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .score-track {
+            width: 100%;
+            height: 8px;
+            background: #f1f5f9;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .score-fill {
+            height: 100%;
+            transition: width 1s ease-out;
+        }
+
+        .score-val-text {
+            font-weight: 900;
+            font-size: 1rem;
+        }
 
         @media (max-width: 900px) {
-            .score-layout { flex-direction: column; gap: 32px; }
-            .score-left { flex: 1; border-right: none; padding-right: 0; border-bottom: 1px solid var(--border); padding-bottom: 32px; width: 100%; }
-            .report-grid { grid-template-columns: 1fr; gap: 20px; }
-            .control-grid { grid-template-columns: 1fr; gap: 20px; }
-            .platform-card { padding: 32px 20px; margin-bottom: 32px; }
-            .analysis-card { padding: 32px 20px; border-radius: 28px; }
-            .container { padding: 40px 16px; }
-            .brand { font-size: 2.8rem; }
-            .price-hero { font-size: 3.5rem; }
-            .company-title { font-size: 1.8rem; }
-            input, button { padding: 16px 20px; font-size: 1rem; }
-            .quick-gate { gap: 12px; margin-top: 32px; }
-            .gate-card { width: 100px; padding: 12px; border-radius: 20px; }
-            .gate-card img { width: 44px; height: 44px; padding: 8px; border-radius: 12px; }
-            .gate-card span { font-size: 0.75rem; }
+            .score-layout {
+                flex-direction: column;
+                gap: 32px;
+            }
+
+            .score-left {
+                flex: 1;
+                border-right: none;
+                padding-right: 0;
+                border-bottom: 1px solid var(--border);
+                padding-bottom: 32px;
+                width: 100%;
+            }
+
+            .report-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .control-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .platform-card {
+                padding: 32px 20px;
+                margin-bottom: 32px;
+            }
+
+            .analysis-card {
+                padding: 32px 20px;
+                border-radius: 28px;
+            }
+
+            .container {
+                padding: 40px 16px;
+            }
+
+            .brand {
+                font-size: 2.8rem;
+            }
+
+            .price-hero {
+                font-size: 3.5rem;
+            }
+
+            .company-title {
+                font-size: 1.8rem;
+            }
+
+            input,
+            button {
+                padding: 16px 20px;
+                font-size: 1rem;
+            }
+
+            .quick-gate {
+                gap: 12px;
+                margin-top: 32px;
+            }
+
+            .gate-card {
+                width: 100px;
+                padding: 12px;
+                border-radius: 20px;
+            }
+
+            .gate-card img {
+                width: 44px;
+                height: 44px;
+                padding: 8px;
+                border-radius: 12px;
+            }
+
+            .gate-card span {
+                font-size: 0.75rem;
+            }
         }
 
         @media (max-width: 480px) {
-            html, body { overflow-x: hidden; position: relative; }
-            .container { padding: 24px 12px; width: 100%; max-width: 100vw; overflow-x: hidden; }
-            .brand { font-size: 2rem; }
-            .subtitle { font-size: 0.9rem; }
-            .price-hero { font-size: 2.4rem; margin: 12px 0; word-break: break-all; }
-            .meta-tag { font-size: 0.9rem; }
-            .status-pill { font-size: 0.9rem; padding: 6px 14px; }
-            .company-title { font-size: 1.4rem; line-height: 1.2; }
-            .score-ring-container { width: 120px; height: 120px; margin-bottom: 16px; }
-            .score-ring .num { font-size: 2.8rem; }
-            .score-header { font-size: 0.8rem; flex-direction: column; align-items: flex-start; gap: 4px; }
-            .score-val-text { font-size: 0.85rem; }
-            .platform-card { padding: 20px 14px; border-radius: 20px; margin-bottom: 24px; width: 100%; }
-            .analysis-card { padding: 20px 14px; border-radius: 20px; width: 100%; }
-            table { min-width: 500px; }
-            .table-container { width: 100%; }
-            th, td { padding: 10px 8px; font-size: 0.8rem; }
-            .quick-gate { gap: 8px; margin-top: 24px; }
-            .gate-card { width: calc(33.33% - 6px); padding: 8px; border-radius: 16px; }
-            .gate-card img { width: 36px; height: 36px; padding: 6px; }
-            .simulation-header { flex-direction: column; align-items: stretch !important; gap: 12px !important; margin-bottom: 24px !important; }
-            .simulation-header > div { 
-                width: 100%; 
-                background: #f8fafc; 
-                padding: 16px !important; 
-                border-radius: 16px; 
+
+            html,
+            body {
+                overflow-x: hidden;
+                position: relative;
+            }
+
+            .container {
+                padding: 24px 12px;
+                width: 100%;
+                max-width: 100vw;
+                overflow-x: hidden;
+            }
+
+            .brand {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 0.9rem;
+            }
+
+            .price-hero {
+                font-size: 2.4rem;
+                margin: 12px 0;
+                word-break: break-all;
+            }
+
+            .meta-tag {
+                font-size: 0.9rem;
+            }
+
+            .status-pill {
+                font-size: 0.9rem;
+                padding: 6px 14px;
+            }
+
+            .company-title {
+                font-size: 1.4rem;
+                line-height: 1.2;
+            }
+
+            .score-ring-container {
+                width: 120px;
+                height: 120px;
+                margin-bottom: 16px;
+            }
+
+            .score-ring .num {
+                font-size: 2.8rem;
+            }
+
+            .score-header {
+                font-size: 0.8rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+
+            .score-val-text {
+                font-size: 0.85rem;
+            }
+
+            .platform-card {
+                padding: 20px 14px;
+                border-radius: 20px;
+                margin-bottom: 24px;
+                width: 100%;
+            }
+
+            .analysis-card {
+                padding: 20px 14px;
+                border-radius: 20px;
+                width: 100%;
+            }
+
+            table {
+                min-width: 500px;
+            }
+
+            .table-container {
+                width: 100%;
+            }
+
+            th,
+            td {
+                padding: 10px 8px;
+                font-size: 0.8rem;
+            }
+
+            .quick-gate {
+                gap: 8px;
+                margin-top: 24px;
+            }
+
+            .gate-card {
+                width: calc(33.33% - 6px);
+                padding: 8px;
+                border-radius: 16px;
+            }
+
+            .gate-card img {
+                width: 36px;
+                height: 36px;
+                padding: 6px;
+            }
+
+            .simulation-header {
+                flex-direction: column;
+                align-items: stretch !important;
+                gap: 12px !important;
+                margin-bottom: 24px !important;
+            }
+
+            .simulation-header>div {
+                width: 100%;
+                background: #f8fafc;
+                padding: 16px !important;
+                border-radius: 16px;
                 display: flex !important;
                 flex-direction: column !important;
                 align-items: stretch !important;
                 gap: 12px !important;
             }
-            .simulation-header > div > div {
+
+            .simulation-header>div>div {
                 display: flex !important;
                 justify-content: space-between !important;
                 align-items: center !important;
                 width: 100%;
             }
-            .simulation-header label { font-size: 0.9rem !important; margin: 0 !important; white-space: nowrap; font-weight: 700; }
-            #cashInput { width: 140px !important; padding: 10px 14px !important; font-size: 1.1rem !important; margin: 0 !important; border: 1px solid var(--border); border-radius: 12px; text-align: right; }
-            #stepSelect { padding: 8px 12px !important; font-size: 1rem !important; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; }
-            
+
+            .simulation-header label {
+                font-size: 0.9rem !important;
+                margin: 0 !important;
+                white-space: nowrap;
+                font-weight: 700;
+            }
+
+            #cashInput {
+                width: 140px !important;
+                padding: 10px 14px !important;
+                font-size: 1.1rem !important;
+                margin: 0 !important;
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                text-align: right;
+            }
+
+            #stepSelect {
+                padding: 8px 12px !important;
+                font-size: 1rem !important;
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                cursor: pointer;
+            }
+
             /* Hide the vertical separator line on mobile */
-            .simulation-header div[style*="width:1px"] { display: none !important; }
-            
+            .simulation-header div[style*="width:1px"] {
+                display: none !important;
+            }
+
             /* PAMS Header Scaling */
-            .analysis-card h3 { font-size: 1.3rem !important; gap: 8px !important; margin-bottom: 24px !important; }
-            .analysis-card h3 svg { width: 24px !important; height: 24px !important; }
-            
-            input, button { padding: 14px 16px; font-size: 0.95rem; }
-            .data-row { padding: 14px 0; }
-            .data-lab { font-size: 0.9rem; }
-            .data-val { font-size: 1rem; }
+            .analysis-card h3 {
+                font-size: 1.3rem !important;
+                gap: 8px !important;
+                margin-bottom: 24px !important;
+            }
+
+            .analysis-card h3 svg {
+                width: 24px !important;
+                height: 24px !important;
+            }
+
+            input,
+            button {
+                padding: 14px 16px;
+                font-size: 0.95rem;
+            }
+
+            .data-row {
+                padding: 14px 0;
+            }
+
+            .data-lab {
+                font-size: 0.9rem;
+            }
+
+            .data-val {
+                font-size: 1rem;
+            }
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-12px); }
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-12px);
+            }
         }
+
         @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.5); opacity: 0.5; }
-            100% { transform: scale(1); opacity: 1; }
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.5);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
-        .waiting-icon svg { animation: float 3s ease-in-out infinite; color: var(--primary); opacity: 0.2; }
 
-        .loader-center { text-align: center; padding: 80px 0; }
-        .spinner { width: 48px; height: 48px; border: 5px solid #f3f4f6; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite; margin: 0 auto 24px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .waiting-icon svg {
+            animation: float 3s ease-in-out infinite;
+            color: var(--primary);
+            opacity: 0.2;
+        }
 
-        .quick-gate { margin-top: 40px; display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
-        .gate-card { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px; background: #fff; border: 1px solid var(--border); border-radius: 24px; cursor: pointer; transition: 0.3s; width: 110px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
-        .gate-card:hover { transform: translateY(-8px); border-color: var(--primary); box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.05); }
-        .gate-card img { width: 48px; height: 48px; padding: 10px; border-radius: 14px; background: #dee2e6; object-fit: contain; border: 1px solid #ced4da; }
-        .gate-card span { font-size: 0.8rem; font-weight: 800; color: var(--text-sub); }
+        .loader-center {
+            text-align: center;
+            padding: 80px 0;
+        }
 
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #f3f4f6;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            margin: 0 auto 24px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .quick-gate {
+            margin-top: 40px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .gate-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 16px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 110px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+        }
+
+        .gate-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--primary);
+            box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        .gate-card img {
+            width: 48px;
+            height: 48px;
+            padding: 10px;
+            border-radius: 14px;
+            background: #dee2e6;
+            object-fit: contain;
+            border: 1px solid #ced4da;
+        }
+
+        .gate-card span {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--text-sub);
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <header>
@@ -192,32 +768,43 @@
         <section class="platform-card">
             <div class="control-grid">
                 <div>
-                    <div class="label-group"><div class="label-dot"></div><label class="field-label">FMP API KEY</label></div>
+                    <div class="label-group">
+                        <div class="label-dot"></div><label class="field-label">FMP API KEY</label>
+                    </div>
                     <input type="password" id="keyInput" placeholder="Enter FMP API Key" />
                     <button class="secondary" onclick="saveKey()">API KEY 저장</button>
                 </div>
                 <div>
                     <div class="label-group" style="justify-content: space-between; width: 100%;">
                         <div style="display:flex; align-items:center; gap:8px;">
-                            <div class="label-dot" style="background:var(--up)"></div><label class="field-label">TICKER SEARCH</label>
+                            <div class="label-dot" style="background:var(--up)"></div><label class="field-label">TICKER
+                                SEARCH</label>
                         </div>
-                        <select id="valMode" style="border: none; background: #e2e8f0; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; color: var(--text-sub); cursor: pointer; outline: none; transition: 0.2s;">
+                        <select id="valMode"
+                            style="border: none; background: #e2e8f0; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; color: var(--text-sub); cursor: pointer; outline: none; transition: 0.2s;">
                             <option value="standard" selected>스탠다드 우량주 모드</option>
                             <option value="hyper">하이퍼 그로스 모드 (AI)</option>
                         </select>
                     </div>
-                    <input type="text" id="tickerInput" placeholder="TICKER (예: NVDA, TSLA)" onkeypress="if(event.key==='Enter') runAnalysis()" />
+                    <input type="text" id="tickerInput" placeholder="TICKER (예: NVDA, TSLA)"
+                        onkeypress="if(event.key==='Enter') runAnalysis()" />
                     <button onclick="runAnalysis()">분석</button>
                 </div>
             </div>
-            
+
             <div class="quick-gate">
-                <div class="gate-card" onclick="setTicker('NVDA')"><img src="https://financialmodelingprep.com/image-stock/NVDA.png"><span>NVIDIA</span></div>
-                <div class="gate-card" onclick="setTicker('AAPL')"><img src="https://financialmodelingprep.com/image-stock/AAPL.png"><span>APPLE</span></div>
-                <div class="gate-card" onclick="setTicker('MSFT')"><img src="https://financialmodelingprep.com/image-stock/MSFT.png"><span>MSFT</span></div>
-                <div class="gate-card" onclick="setTicker('GOOGL')"><img src="https://financialmodelingprep.com/image-stock/GOOGL.png"><span>GOOGLE</span></div>
-                <div class="gate-card" onclick="setTicker('AMZN')"><img src="https://financialmodelingprep.com/image-stock/AMZN.png"><span>AMAZON</span></div>
-                <div class="gate-card" onclick="setTicker('TSLA')"><img src="https://financialmodelingprep.com/image-stock/TSLA.png"><span>TESLA</span></div>
+                <div class="gate-card" onclick="setTicker('NVDA')"><img
+                        src="https://financialmodelingprep.com/image-stock/NVDA.png"><span>NVIDIA</span></div>
+                <div class="gate-card" onclick="setTicker('AAPL')"><img
+                        src="https://financialmodelingprep.com/image-stock/AAPL.png"><span>APPLE</span></div>
+                <div class="gate-card" onclick="setTicker('MSFT')"><img
+                        src="https://financialmodelingprep.com/image-stock/MSFT.png"><span>MSFT</span></div>
+                <div class="gate-card" onclick="setTicker('GOOGL')"><img
+                        src="https://financialmodelingprep.com/image-stock/GOOGL.png"><span>GOOGLE</span></div>
+                <div class="gate-card" onclick="setTicker('AMZN')"><img
+                        src="https://financialmodelingprep.com/image-stock/AMZN.png"><span>AMAZON</span></div>
+                <div class="gate-card" onclick="setTicker('TSLA')"><img
+                        src="https://financialmodelingprep.com/image-stock/TSLA.png"><span>TESLA</span></div>
             </div>
         </section>
 
@@ -225,18 +812,24 @@
             <div class="loader-center" style="padding: 100px 20px;">
                 <div class="waiting-icon" style="margin-bottom: 32px;">
                     <svg width="96" height="96" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M3 20H21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                        <path d="M5 16L8 12L11 15L15 9L18 11L21 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M15 9H11V13" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="0.3"/>
+                        <path d="M3 20H21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                        <path d="M5 16L8 12L11 15L15 9L18 11L21 7" stroke="currentColor" stroke-width="1.5"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M15 9H11V13" stroke="currentColor" stroke-width="1" stroke-linecap="round"
+                            stroke-linejoin="round" opacity="0.3" />
                     </svg>
                 </div>
-                <h3 style="font-weight: 900; font-size: 1.6rem; color: var(--text-main); letter-spacing: -0.04em; margin-bottom: 12px;">데이터 분석 엔진 대기 중</h3>
+                <h3
+                    style="font-weight: 900; font-size: 1.6rem; color: var(--text-main); letter-spacing: -0.04em; margin-bottom: 12px;">
+                    데이터 분석 엔진 대기 중</h3>
                 <p style="font-size: 1.05rem; font-weight: 600; color: var(--text-sub); line-height: 1.6;">
-                    실시간 미국 주식 데이터를 기반으로 한 <br/>
+                    실시간 미국 주식 데이터를 기반으로 한 <br />
                     PAMS 지능형 매수 전략을 생성할 준비가 되었습니다.
                 </p>
-                <div style="margin-top: 32px; display: inline-flex; align-items: center; gap: 8px; background: #f1f5f9; padding: 10px 20px; border-radius: 100px; font-size: 0.85rem; font-weight: 800; color: var(--text-muted);">
-                    <span style="width: 8px; height: 8px; background: var(--primary); border-radius: 50%; animation: pulse 1.5s infinite;"></span>
+                <div
+                    style="margin-top: 32px; display: inline-flex; align-items: center; gap: 8px; background: #f1f5f9; padding: 10px 20px; border-radius: 100px; font-size: 0.85rem; font-weight: 800; color: var(--text-muted);">
+                    <span
+                        style="width: 8px; height: 8px; background: var(--primary); border-radius: 50%; animation: pulse 1.5s infinite;"></span>
                     시스템 실시간 동기화 완료
                 </div>
             </div>
@@ -248,12 +841,12 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             const k = localStorage.getItem(STORAGE_KEY);
-            if(k) document.getElementById('keyInput').value = k;
+            if (k) document.getElementById('keyInput').value = k;
         });
 
         function saveKey() {
             const k = document.getElementById('keyInput').value.trim();
-            if(!k) return alert('API 키를 입력해주세요.');
+            if (!k) return alert('API 키를 입력해주세요.');
             localStorage.setItem(STORAGE_KEY, k);
             alert('API 키가 성공적으로 등록되었습니다.');
         }
@@ -268,8 +861,8 @@
             const apiKey = localStorage.getItem(STORAGE_KEY);
             const result = document.getElementById('result');
 
-            if(!ticker) return alert('티커를 입력하세요.');
-            if(!apiKey) return alert('먼저 API 키를 저장해주세요.');
+            if (!ticker) return alert('티커를 입력하세요.');
+            if (!apiKey) return alert('먼저 API 키를 저장해주세요.');
 
             result.innerHTML = `<div class="loader-center"><div class="spinner"></div><p style="font-weight:800; font-size:1.2rem;">${ticker} 역추세 매수 기회 분석 중...</p></div>`;
 
@@ -288,7 +881,7 @@
                 if (!Array.isArray(qData) || qData.length === 0) {
                     throw new Error(`'${ticker}' 종목 데이터를 찾을 수 없습니다.`);
                 }
-                
+
                 const q = qData[0];
                 const r = (Array.isArray(rData) && rData.length > 0) ? rData[0] : {};
                 let history = [];
@@ -310,20 +903,20 @@
 
             // 날짜 오름차순 정렬 (과거 -> 현재)
             const sorted = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
-            
+
             // 필드명 유연하게 대응 (price 또는 close)
             const prices = sorted.map(d => Number(d.price || d.close || 0)).filter(p => p > 0);
-            
+
             if (prices.length < 5) return null; // 최소 데이터 부족
-            
-            prices.push(Number(currentPrice)); 
+
+            prices.push(Number(currentPrice));
 
             const len = prices.length;
 
             // 1. 표준 RSI (14) - Wilder's Smoothing Method
             let rsi = 50;
             const periodRSI = 14;
-            
+
             if (len > periodRSI) {
                 let avgGain = 0;
                 let avgLoss = 0;
@@ -341,7 +934,7 @@
                 for (let i = periodRSI + 1; i < len; i++) {
                     const diff = prices[i] - prices[i - 1];
                     let currentGain = 0, currentLoss = 0;
-                    
+
                     if (diff >= 0) currentGain = diff;
                     else currentLoss = -diff;
 
@@ -383,26 +976,26 @@
             if (!tech) return { total: 0, detail, tech: {}, mdd: 0, pe: 0, pb: 0 };
 
             // 1. RSI Score (10% Weight)
-            if(tech.rsi <= 30) detail.rsi = 100;
-            else if(tech.rsi >= 70) detail.rsi = 0;
+            if (tech.rsi <= 30) detail.rsi = 100;
+            else if (tech.rsi >= 70) detail.rsi = 0;
             else detail.rsi = Math.max(0, 100 - (tech.rsi - 30) * 2.5);
 
             // 2. Bollinger Bands Score (15% Weight)
-            if(tech.pctB <= 0) detail.bb = 100;
-            else if(tech.pctB >= 1) detail.bb = 0;
+            if (tech.pctB <= 0) detail.bb = 100;
+            else if (tech.pctB >= 1) detail.bb = 0;
             else detail.bb = Math.max(0, 100 - tech.pctB * 100);
 
             // 3. MA200 Score (25% Weight)
             const ma200Diff = (price - tech.ma200) / (tech.ma200 || 1);
-            if(ma200Diff <= -0.2) detail.ma200 = 100;
-            else if(ma200Diff >= 0.1) detail.ma200 = 0;
+            if (ma200Diff <= -0.2) detail.ma200 = 100;
+            else if (ma200Diff >= 0.1) detail.ma200 = 0;
             else detail.ma200 = Math.max(0, 100 - (ma200Diff + 0.2) * 333);
 
             // 4. MDD Score (20% Weight)
             const high52 = q?.yearHigh || price;
             const mdd = (price - high52) / (high52 || 1);
-            if(mdd <= -0.4) detail.mdd = 100;
-            else if(mdd >= -0.1) detail.mdd = 0;
+            if (mdd <= -0.4) detail.mdd = 100;
+            else if (mdd >= -0.1) detail.mdd = 0;
             else detail.mdd = Math.max(0, (Math.abs(mdd) - 0.1) * 333);
 
             // 5. Valuation Score (30% Weight) - Growth Stock Optimized
@@ -410,28 +1003,28 @@
             const pe = (q?.eps && q.eps !== 0) ? (q.price / q.eps) : (q?.pe || r?.priceToEarningsRatio);
             const psr = r?.priceToSalesRatio;
             const pb = r?.priceToBookRatio;
-            
+
             let valScore = 0;
             if (valMode === 'hyper') {
                 // Hyper-Growth 모드: 고성장주의 고평가 프리미엄 여유폭 허용 (PER 80, PSR 20)
-                if(pe > 0 && pe < 35) valScore += 50; 
-                else if(pe > 0 && pe < 80) valScore += 25;
-                else if(pe === undefined || pe === null) valScore += 12.5;
+                if (pe > 0 && pe < 35) valScore += 50;
+                else if (pe > 0 && pe < 80) valScore += 25;
+                else if (pe === undefined || pe === null) valScore += 12.5;
 
-                if(psr > 0 && psr < 10.0) valScore += 50; 
-                else if(psr > 0 && psr < 20.0) valScore += 25;
-                else if(psr === undefined || psr === null) valScore += 12.5;
+                if (psr > 0 && psr < 10.0) valScore += 50;
+                else if (psr > 0 && psr < 20.0) valScore += 25;
+                else if (psr === undefined || psr === null) valScore += 12.5;
             } else {
                 // Standard 모드: 애플, 은행 등 전통/스탠다드 우량주를 위한 깐깐한 가치기준 (PER 35, PSR 8)
-                if(pe > 0 && pe < 20) valScore += 50; 
-                else if(pe > 0 && pe < 35) valScore += 25;
-                else if(pe === undefined || pe === null) valScore += 12.5;
+                if (pe > 0 && pe < 20) valScore += 50;
+                else if (pe > 0 && pe < 35) valScore += 25;
+                else if (pe === undefined || pe === null) valScore += 12.5;
 
-                if(psr > 0 && psr < 4.0) valScore += 50; 
-                else if(psr > 0 && psr < 8.0) valScore += 25;
-                else if(psr === undefined || psr === null) valScore += 12.5;
+                if (psr > 0 && psr < 4.0) valScore += 50;
+                else if (psr > 0 && psr < 8.0) valScore += 25;
+                else if (psr === undefined || psr === null) valScore += 12.5;
             }
-            
+
             detail.val = valScore;
 
             // Weighted Total Score
@@ -443,7 +1036,7 @@
             const scoreData = calculateReverseScore(q, r, history, valMode);
             window.currentScoreData = { ...scoreData, q }; // 데이터 인텔리전스 공유
             const result = document.getElementById('result');
-            
+
             const price = Number(q?.price || 0);
             const change = Number(q?.change || 0);
             const isUp = change >= 0;
@@ -463,18 +1056,18 @@
                 else hue = 0;               // Red/Gray
 
                 // Saturation: Adjust based on score within its range for a "vibrant" feel
-                const saturation = Math.min(100, Math.max(30, s)); 
+                const saturation = Math.min(100, Math.max(30, s));
                 const lightness = 45;
                 return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
             };
 
             const getGrade = (s) => {
-                if(s >= 80) return { t: 'S (강력 매수)' };
-                if(s >= 65) return { t: 'A (적극 매수)' };
-                if(s >= 50) return { t: 'B (관심 필요)' };
+                if (s >= 80) return { t: 'S (강력 매수)' };
+                if (s >= 65) return { t: 'A (적극 매수)' };
+                if (s >= 50) return { t: 'B (관심 필요)' };
                 return { t: 'C (관망)' };
             };
-            
+
             const dynamicColor = getDynamicColor(scoreData.total);
             const grade = getGrade(scoreData.total);
 
@@ -483,6 +1076,25 @@
             // ROE 직접 계산 (ROE = PBR / PER)
             const pbVal = r?.priceToBookRatio;
             const calculatedRoe = (peVal && pbVal && peVal !== 0) ? (pbVal / peVal) : r?.returnOnEquity;
+
+            const getAiComment = (sd) => {
+                const total = sd.total;
+                const val = sd.detail.val;
+                if (total >= 80) {
+                    if (val >= 80) return { icon: '✨', text: '재무적 가치와 펀더멘탈, 기술적 지표가 모두 완벽한 강력 매수 구간입니다.', color: 'var(--primary)' };
+                    return { icon: '🚀', text: '안전마진이 최고조에 달하진 않았지만, 강력한 반등 모멘텀이 포착되었습니다.', color: 'var(--primary)' };
+                } else if (total >= 65) {
+                    if (val >= 70) return { icon: '💎', text: '기업 가치 대비 훌륭한 가격대입니다. 적극적인 분할 매수로 접근하기 좋은 위치입니다.', color: 'var(--primary)' };
+                    return { icon: '📈', text: '기술적 반등 지점에 도달했습니다. 단기적인 반등과 장기 관점을 모두 챙길 수 있습니다.', color: 'var(--text-main)' };
+                } else if (total >= 50) {
+                    if (val <= 30) return { icon: '⚠️', text: '현재 주가는 다소 고평가되어 있습니다. 보수적인 비중으로 접근하거나 더 깊은 조정을 기다리세요.', color: '#ea580c' }; // 주황색
+                    return { icon: '⚖️', text: '매수-매도세가 공방을 벌이는 중립적 구간입니다. 무리한 진입보다는 확실한 방향성이 나올 때까지 관망하세요.', color: '#ea580c' };
+                } else {
+                    if (sd.detail.mdd >= 70) return { icon: '🚨', text: '매우 매서운 하락 변동성에 노출되어 있습니다. 신규 진입은 피하는 것이 좋습니다.', color: 'var(--down)' };
+                    return { icon: '📉', text: '하락 추세가 강건합니다. 섣부른 물타기보다는 브레이크가 걸릴 때까지 기다려야 합니다.', color: 'var(--down)' };
+                }
+            };
+            const aiInsight = getAiComment(scoreData);
 
             result.innerHTML = `
                 <div class="report-grid">
@@ -498,7 +1110,7 @@
                         <div class="data-grid" style="margin-top:48px; border-top:2px solid #f8fafc; padding-top:32px;">
                             <div class="data-row"><span class="data-lab">52주 최고가</span><span class="data-val">$${(q?.yearHigh || 0).toFixed(2)}</span></div>
                             <div class="data-row"><span class="data-lab">52주 최저가</span><span class="data-val">$${(q?.yearLow || 0).toFixed(2)}</span></div>
-                            <div class="data-row"><span class="data-lab">시가총액</span><span class="data-val">$${(Number(q?.marketCap || 0) >= 1e12 ? (Number(q?.marketCap)/1e12).toFixed(2) + 'T' : (Number(q?.marketCap || 0)/1e9).toFixed(2) + 'B')}</span></div>
+                            <div class="data-row"><span class="data-lab">시가총액</span><span class="data-val">$${(Number(q?.marketCap || 0) >= 1e12 ? (Number(q?.marketCap) / 1e12).toFixed(2) + 'T' : (Number(q?.marketCap || 0) / 1e9).toFixed(2) + 'B')}</span></div>
                         </div>
                     </div>
 
@@ -513,6 +1125,15 @@
                             <div class="data-row"><span class="data-lab">순이익률</span><span class="data-val">${fmt(r?.netProfitMargin, 1, true)}</span></div>
                             <div class="data-row"><span class="data-lab">자기자본이익률(ROE)</span><span class="data-val" style="color:var(--primary)">${fmt(calculatedRoe, 1, true)}</span></div>
                             <div class="data-row"><span class="data-lab">부채비율</span><span class="data-val">${fmt(r?.debtToEquityRatio, 1)}</span></div>
+                        </div>
+                    </div>
+
+                    <!-- AI ONE-LINER (Full Width) -->
+                    <div class="analysis-card full-width" style="border: 2px solid ${aiInsight.color}; display: flex; align-items: center; gap: 20px;">
+                        <span style="font-size: 2.8rem; line-height: 1; min-width: 45px; text-align: center;">${aiInsight.icon}</span>
+                        <div>
+                            <div style="font-size: 0.85rem; font-weight: 900; color: ${aiInsight.color}; margin-bottom: 6px; letter-spacing: 0.05em;">AI INSIGHT</div>
+                            <div style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em; line-height: 1.4;">${aiInsight.text}</div>
                         </div>
                     </div>
 
@@ -531,12 +1152,12 @@
                             </div>
                             <div class="score-right">
                                 ${[
-                                    { lab: 'Growth Value (PSR/PER)', val: scoreData.detail.val, raw: `PSR ${scoreData.psr ? scoreData.psr.toFixed(2) : 'N/A'} / PER ${scoreData.pe ? scoreData.pe.toFixed(1) : 'N/A'}`, w: '30%' },
-                                    { lab: 'MA200 이격도 (장기)', val: scoreData.detail.ma200, raw: (((price - scoreData.tech.ma200)/scoreData.tech.ma200)*100).toFixed(1) + '%', w: '25%' },
-                                    { lab: '52주 MDD (낙폭)', val: scoreData.detail.mdd, raw: (scoreData.mdd * 100).toFixed(1) + '%', w: '20%' },
-                                    { lab: '볼린저 밴드 (단기)', val: scoreData.detail.bb, raw: (scoreData.tech.pctB * 100).toFixed(1) + '%', w: '15%' },
-                                    { lab: 'RSI (심리)', val: scoreData.detail.rsi, raw: scoreData.tech.rsi?.toFixed(1) || 'N/A', w: '10%' }
-                                ].map(s => `
+                    { lab: 'Growth Value (PSR/PER)', val: scoreData.detail.val, raw: `PSR ${scoreData.psr ? scoreData.psr.toFixed(2) : 'N/A'} / PER ${scoreData.pe ? scoreData.pe.toFixed(1) : 'N/A'}`, w: '30%' },
+                    { lab: 'MA200 이격도 (장기)', val: scoreData.detail.ma200, raw: (((price - scoreData.tech.ma200) / scoreData.tech.ma200) * 100).toFixed(1) + '%', w: '25%' },
+                    { lab: '52주 MDD (낙폭)', val: scoreData.detail.mdd, raw: (scoreData.mdd * 100).toFixed(1) + '%', w: '20%' },
+                    { lab: '볼린저 밴드 (단기)', val: scoreData.detail.bb, raw: (scoreData.tech.pctB * 100).toFixed(1) + '%', w: '15%' },
+                    { lab: 'RSI (심리)', val: scoreData.detail.rsi, raw: scoreData.tech.rsi?.toFixed(1) || 'N/A', w: '10%' }
+                ].map(s => `
                                     <div class="score-item">
                                         <div class="score-header">
                                             <span style="color:var(--text-sub);">${s.lab} <small style="opacity:0.6; font-weight:600;">(${s.w})</small></span>
@@ -628,8 +1249,8 @@
             const cash = Number(document.getElementById('cashInput')?.value || 10000);
             const steps = Number(document.getElementById('stepSelect')?.value || 4);
             const sd = window.currentScoreData;
-            
-            if(!price || !sd) return;
+
+            if (!price || !sd) return;
 
             const score = sd.total;
             const isHigh = score >= 65; // S, A 등급 (공격적)
@@ -639,7 +1260,7 @@
             let firstTarget = price;
             if (isLow) firstTarget = sd.tech.lowerBB || price * 0.92; // C: 볼린저 하단까지 대기
             else if (score < 65) firstTarget = (price + (sd.tech.lowerBB || price * 0.95)) / 2; // B: 중간 지점 대기
-            
+
             // 타겟가가 현재가보다 높으면 현재가로 제한 (폭락하여 하단 밴드 밑에 있는 경우 방어)
             firstTarget = Math.min(price, firstTarget);
 
@@ -667,7 +1288,7 @@
 
             // 4. 전략적 근거 및 명칭
             const strategyName = isHigh ? "반등 포착형 (공격적)" : (isLow ? "폭락 대기형 (초방어적)" : "수준 대응형 (밸런스)");
-            const reasons = isHigh 
+            const reasons = isHigh
                 ? ['즉시 편입 (기회 확보)', '지지선 보강', '추세 반전 대기', '안전 마진 확보', '최종 방어선', '역사적 바닥']
                 : ['보수적 대기 (하락 관망)', '기술적 타겟가 진입', '본격 비중 확대', '바닥 확인 매수', '공포 구간 매집', '최종 물량 확보'];
 
@@ -675,10 +1296,10 @@
             let lastPrice = firstTarget;
             let totalQty = 0;
             let totalAmount = 0;
-            
-            for(let i = 0; i < steps; i++) {
+
+            for (let i = 0; i < steps; i++) {
                 let targetPrice = techTargets[i];
-                
+
                 // 안전장치 및 변동성 간격 조정 (Gap Adjustment)
                 if (i > 0) {
                     const minGap = isHigh ? 0.97 : 0.92; // 고득점은 촘촘하게, 저득점은 넓게
@@ -690,17 +1311,17 @@
 
                 const amount = cash * weights[i];
                 const qty = amount / targetPrice;
-                
+
                 totalQty += qty;
                 totalAmount += amount;
-                
+
                 html += `
                     <tr>
                         <td>${i + 1}차 매수</td>
                         <td style="color:var(--text-sub); font-weight:500;">${i === 0 ? strategyName : reasons[i]}</td>
                         <td>$${targetPrice.toFixed(2)}</td>
-                        <td style="color:var(--primary)">${(weights[i]*100).toFixed(0)}%</td>
-                        <td style="font-weight:800;">$${amount.toLocaleString(undefined, {maximumFractionDigits:0})}</td>
+                        <td style="color:var(--primary)">${(weights[i] * 100).toFixed(0)}%</td>
+                        <td style="font-weight:800;">$${amount.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
                         <td style="color:var(--primary)">${qty.toFixed(2)} 주</td>
                     </tr>
                 `;
@@ -725,4 +1346,5 @@
         }
     </script>
 </body>
+
 </html>
